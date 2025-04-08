@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 from classes.Sensor import Sensor
+import logging
 
 
 class DistanceSensor(Sensor):
@@ -8,6 +9,7 @@ class DistanceSensor(Sensor):
         self.__pinTrig = pinTrig
         self.__pinEcho = pinEcho
         self.__side = side.capitalize()
+        self.logger = logging.getLogger(__name__)
 
         GPIO.setup(self.__pinTrig, GPIO.OUT)
         GPIO.setup(self.__pinEcho, GPIO.IN)
@@ -27,6 +29,7 @@ class DistanceSensor(Sensor):
             while GPIO.input(self.__pinEcho) == 0:
                 start_time = time.time()
                 if start_time > timeout:
+                    self.logger.error("Début du signal trop long.")
                     raise TimeoutError("Début du signal trop long.")
 
             stop_time = time.time()
@@ -34,21 +37,25 @@ class DistanceSensor(Sensor):
             while GPIO.input(self.__pinEcho) == 1:
                 stop_time = time.time()
                 if stop_time > timeout:
+                    self.logger.error("Fin du signal trop long.")
                     raise TimeoutError("Fin du signal trop long.")
 
             duration = stop_time - start_time
             if duration <= 0:
+                self.logger.error("Durée invalide.")
                 raise ValueError("Durée invalide.")
             
             distance = round(duration * 17150, 2)
 
             if distance < 2 or distance > 400:
+                self.logger.error(f"Distance hors limites : {distance} cm")
                 raise ValueError(f"Hors limites : {distance} cm")
             
             return distance
 
         except Exception as e:
             print(f"[{self.__side}] Erreur : {e}")
+            self.logger.error(f"[{self.__side}] Erreur : {e}")
             return None
 
     
