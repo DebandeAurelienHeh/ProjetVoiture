@@ -4,6 +4,7 @@ import adafruit_pca9685
 import busio
 import board
 import time
+import logging
 
 class MotorManager():
     def __init__(self, i2c_bus:busio.I2C):
@@ -12,6 +13,7 @@ class MotorManager():
         self.__i2c_bus = i2c_bus
         self.__pwmDriver = adafruit_pca9685.PCA9685(self.__i2c_bus, address=0x40)
         self.__pwmDriver.frequency = 60
+        self.logging = logging.getLogger(__name__)
 
     @property
     def dcMotorsPropulsion(self):
@@ -41,10 +43,12 @@ class MotorManager():
             for motor in self.__dcMotorsPropulsion:
                 if speed_value == 0:
                     motor.stop()
+                    self.logging.info("Motor stopped.")
                 else:
                     motor.setDirection(front)
                     self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
         else:
+            self.logging.error("Speed must be an integer or float.")
             raise ValueError("Speed must be an integer or float.")
         
     def setAngle(self, steering:float) -> None:
@@ -56,6 +60,7 @@ class MotorManager():
             servo_duty = self.convert_steering_to_duty(steering)
             self.__pwmDriver.channels[self.__servoDirection.boardChannel].duty_cycle = servo_duty
         else:
+            self.logging.error("Steering must be an integer or float.")
             raise ValueError("Steering must be an integer or float.")
         
     def convert_steering_to_duty(self, steering: float) -> int:
