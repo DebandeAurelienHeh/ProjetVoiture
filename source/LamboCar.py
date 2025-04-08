@@ -1,5 +1,11 @@
 import time
 from MotorManager import MotorManager
+import logging
+from logs_config import setup_logging
+"""
+Launch the logs functionality to log the informations in the file logs
+"""
+setup_logging()
 
 class LamboCar:
     def __init__(self):
@@ -11,6 +17,7 @@ class LamboCar:
         self.__currentState = ""
         self.__constConfig = {}
         self.__mode = None
+        self.logger = logging.getLogger(__name__)
 
     @property
     def motorManager(self):
@@ -86,7 +93,8 @@ class LamboCar:
         elif direction.lower() == "right":
             self.__motorManager.setAngle(100)
         else:
-            raise ValueError("Direction doit être 'left' ou 'right'")
+            self.logger.error("Circle: Invalid direction, it must be 'left' or 'right'")
+            raise ValueError("Direction must be 'left' or 'right'")
 
         time.sleep(10)
         self.__motorManager.setAngle(0)
@@ -96,8 +104,10 @@ class LamboCar:
         self.__motorManager.setSpeed(50)  
         for _ in range(duration):
             self.__motorManager.setAngle(-100)
+            self.logger.info("eightTurn: Turning left")
             time.sleep(5)
             self.__motorManager.setAngle(100)
+            self.logger.info("eightTurn: Turning right")
             time.sleep(5)
         
         self.__motorManager.setAngle(0)
