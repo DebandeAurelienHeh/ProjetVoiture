@@ -3,6 +3,7 @@ import adafruit_pca9685
 import busio
 import board
 import time
+import logging
 
 class MotorManager():
     def __init__(self, i2c_bus:busio.I2C):
@@ -10,6 +11,10 @@ class MotorManager():
         self.__i2c_bus = i2c_bus
         self.__pwmDriver = adafruit_pca9685.PCA9685(self.__i2c_bus)
         self.__pwmDriver.frequency = 60
+        """
+        Donne le nom de la classe aux logs
+        """
+        self.logger = logging.getLogger(__name__)
 
     def setSpeed(self, speed:float) -> None:
         
@@ -34,6 +39,7 @@ class MotorManager():
                     self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
         else:
             raise ValueError("Speed must be an integer or float.")
+            self.logger.error("Speed must be an integer or float.")
 
 
 i2c_bus = busio.I2C(board.SCL, board.SDA)
