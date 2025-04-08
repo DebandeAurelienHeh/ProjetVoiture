@@ -6,11 +6,21 @@ import time
 
 class MotorManager():
     def __init__(self, i2c_bus:busio.I2C):
-        self.__dcMotorsPropulsion = [DCMotor(5, 0, 1), DCMotor(4, 2, 3)]
+        self.__dcMotorsPropulsion = [DCMotor(5, 17, 18), DCMotor(4, 27, 22)]
         self.__i2c_bus = i2c_bus
-        self.__pwmDriver = adafruit_pca9685.PCA9685(self.__i2c_bus)
+        self.__pwmDriver = adafruit_pca9685.PCA9685(self.__i2c_bus, address=0x40)
         self.__pwmDriver.frequency = 60
 
+    @property
+    def dcMotorsPropulsion(self):
+        return self.__dcMotorsPropulsion
+    @property
+    def i2c_bus(self):
+        return self.__i2c_bus
+    @property
+    def pwmDriver(self):
+        return self.__pwmDriver
+    
     def setSpeed(self, speed:float) -> None:
         
         """
@@ -35,33 +45,5 @@ class MotorManager():
         else:
             raise ValueError("Speed must be an integer or float.")
 
-
-i2c_bus = busio.I2C(board.SCL, board.SDA)
-motor_manager = MotorManager(i2c_bus)
-print(i2c_bus.scan())
-motor_manager.setSpeed(0) 
-time.sleep(3)
-motor_manager.setSpeed(10) 
-time.sleep(3)
-motor_manager.setSpeed(50)
-time.sleep(3)
-motor_manager.setSpeed(70) 
-time.sleep(3)
-motor_manager.setSpeed(50)
-time.sleep(3)
-motor_manager.setSpeed(10)
-time.sleep(3)
-motor_manager.setSpeed(0)
-motor_manager.setSpeed(-10)
-time.sleep(3)
-motor_manager.setSpeed(-50)
-time.sleep(3)
-motor_manager.setSpeed(-70)
-time.sleep(3)
-motor_manager.setSpeed(-50)
-time.sleep(3)
-motor_manager.setSpeed(-10)
-time.sleep(3)
-motor_manager.setSpeed(0)
 
 
