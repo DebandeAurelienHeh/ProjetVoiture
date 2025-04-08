@@ -12,24 +12,30 @@ class MotorManager():
         self.__pwmDriver.frequency = 60
 
     def setSpeed(self, speed:float) -> None:
+        
         """
         Définit la vitesse des moteurs DC.
         
         :param speed: Valeur comprise entre -100 et 100.
                       Un signe négatif indique la marche arrière, positif la marche avant, 0 arret.
         """
-        front = (speed >= 0)
-        speed_value = abs(speed)
-        
-        dc_duty = int((speed_value / 100.0) * 65535)
-        
-        for motor in self.__dcMotorsPropulsion:
-            if speed_value == 0:
-                motor.stop()
-            else:
-                motor.setDirection(front)
-                self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
-
+        if isinstance(speed, int) or isinstance(speed, float):
+       
+            front = (speed >= 0)
+            speed_value = abs(speed)
+            
+            dc_duty = int((speed_value / 100.0) * 65535)
+            
+            for motor in self.__dcMotorsPropulsion:
+                if speed_value == 0:
+                    motor.stop()
+                    print(f"Motor {motor.pinEnable} stopped")
+                else:
+                    motor.setDirection(front)
+                    self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
+                    print(f"Motor {motor.pinEnable} set to {dc_duty}")
+        else:
+            raise ValueError("Speed must be an integer or float.")
 
 
 i2c_bus = busio.I2C(board.SCL, board.SDA)
