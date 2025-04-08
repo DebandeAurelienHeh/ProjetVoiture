@@ -1,5 +1,5 @@
-from source.DCMotor import DCMotor
-from source.ServoMotor import ServoMotor
+from DCMotor import DCMotor
+from ServoMotor import ServoMotor
 import adafruit_pca9685
 import busio
 import board
@@ -41,9 +41,15 @@ class MotorManager():
             for motor in self.__dcMotorsPropulsion:
                 if speed_value == 0:
                     motor.stop()
+                    print("Speed is 0, motors stopped.")
                 else:
                     motor.setDirection(front)
                     self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
+                    if front:
+                        print(f"Motors are moving forward at {speed_value}%.")
+                    else:
+                        print(f"Motors are moving backward at {speed_value}%.")
+                        
         else:
             raise ValueError("Speed must be an integer or float.")
         
