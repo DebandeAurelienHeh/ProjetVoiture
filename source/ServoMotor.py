@@ -4,7 +4,7 @@ class ServoMotor():
         self.__rangeDegrees = rangeDegrees
         self.__minPulse = 1.0 # in ms
         self.__maxPulse = 2.0 # in ms
-        self.__centerAngle = 90
+        self.__centerAngle = 80
         self.__frequency = 60
     
     @property
