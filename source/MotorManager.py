@@ -96,15 +96,5 @@ class MotorManager():
         return int(duty_fraction * 65535)
 
 
-i2c_bus = busio.I2C(board.SCL, board.SDA)
-motor_manager = MotorManager(i2c_bus)
-motor_manager.setSpeed(30) 
-motor_manager.setAngle(0)
-time.sleep(2)
-motor_manager.setAngle(-40)
-time.sleep(2)
-motor_manager.setAngle(40)
-time.sleep(2)
-motor_manager.setSpeed(0)
-motor_manager.setAngle(0)
+
 

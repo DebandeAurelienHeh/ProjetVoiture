@@ -1,17 +1,19 @@
 import time
 from MotorManager import MotorManager
 import logging
-from logs_config import setup_logging
+import busio
+import board
+#from logs_config import setup_logging
 """
 Launch the logs functionality to log the informations in the file logs
 """
-setup_logging()
+#setup_logging()
 
 class LamboCar:
-    def __init__(self):
+    def __init__(self, i2c_bus: busio.I2C):
         self.__carName = "LamboCar"
         self.__sensorManager = None
-        self.__motorManager = None
+        self.__motorManager = MotorManager(i2c_bus)
         self.__totalLaps = 0
         self.__lastLapDuration = 0
         self.__currentState = ""
@@ -126,3 +128,9 @@ class LamboCar:
         time.sleep(1)
         self.__motorManager.setSpeed(75)
         self.__motorManager.setAngle(0)
+
+
+i2c_bus = busio.I2C(board.SCL, board.SDA)
+lambo = LamboCar(i2c_bus)
+
+lambo.reverseGear()
