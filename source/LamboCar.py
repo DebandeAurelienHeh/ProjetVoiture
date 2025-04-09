@@ -92,6 +92,7 @@ class LamboCar:
 
     def stopCar(self):
         self.__motorManager.setSpeed(0)
+        self.__motorManager.setAngle(0)
 
     def reverseGear(self):
         self.logger.info("The car is going forward")
