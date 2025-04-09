@@ -32,7 +32,7 @@ class MotorManager:
         try:
             """
             Définit la vitesse des moteurs DC.
-    
+            
             :param speed: Valeur comprise entre -100 et 100.
                           Un signe négatif indique la marche arrière, positif la marche avant, 0 arret.
             """

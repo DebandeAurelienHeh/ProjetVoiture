@@ -1,0 +1,2 @@
+Créer uniquement pour créer le folder. 
+Delete when a log file is done.
