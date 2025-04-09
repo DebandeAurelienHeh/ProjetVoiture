@@ -103,14 +103,14 @@ class LamboCar:
         self.__motorManager.setSpeed(0)
 
     def eightTurn(self, duration: int):
-        self.__motorManager.setSpeed(50)  
+        self.__motorManager.setSpeed(40)  
         for _ in range(duration):
-            self.__motorManager.setAngle(-90)
+            self.__motorManager.setAngle(-100)
             self.logger.info("eightTurn: Turning left")
-            time.sleep(3)
+            time.sleep(8)
             self.__motorManager.setAngle(90)
             self.logger.info("eightTurn: Turning right")
-            time.sleep(3)
+            time.sleep(6)
         
         self.__motorManager.setAngle(0)
         self.__motorManager.setSpeed(0)
@@ -164,4 +164,5 @@ lambo.prepareMotors()
 time.sleep(2)
 lambo.reverseGear()
 print("Reversing gear done")
-
+lambo.eightTurn(1)
+print("Eight turn done")
