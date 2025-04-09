@@ -8,7 +8,7 @@ import time
 class MotorManager():
     def __init__(self, i2c_bus:busio.I2C):
         self.__dcMotorsPropulsion = [DCMotor(5, 17, 18), DCMotor(4, 27, 22)]
-        self.__servoDirection = ServoMotor(0, 45)
+        self.__servoDirection = ServoMotor(0, 50)
         self.__i2c_bus = i2c_bus
         self.__pwmDriver = adafruit_pca9685.PCA9685(self.__i2c_bus, address=0x40)
         self.__pwmDriver.frequency = 60
