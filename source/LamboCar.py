@@ -3,6 +3,7 @@ from MotorManager import MotorManager
 import logging
 import busio
 import board
+from SensorManager import SensorManager
 from logs_config import setup_logging
 
 """
@@ -14,7 +15,7 @@ setup_logging()
 class LamboCar:
     def __init__(self, i2c_bus: busio.I2C):
         self.__carName = "LamboCar"
-        self.__sensorManager = None
+        self.__sensorManager = SensorManager(i2c_bus)
         self.__motorManager = MotorManager(i2c_bus)
         self.__totalLaps = 0
         self.__lastLapDuration = 0
@@ -50,22 +51,39 @@ class LamboCar:
     def selectMode(self) -> str:
         pass
 
-    def detectObstacle(self) -> bool:
-
+    def detectObstacle(self):
         distances = self.sensorManager.getDistance()
-        front_distance = distances[0]  
+        front_distance = distances[0]
         left_distance = distances[1]
         right_distance = distances[2]
-        
-        if front_distance is not None and front_distance < 30:
-            return "Front"
-        
-        elif left_distance is not None and left_distance< 20:
-            return "Left"
-    
-        elif right_distance is not None and left_distance < 20:
-            return "Right"
-        return False
+
+
+        if left_distance is not None and left_distance < 15:
+            self.logger.info(f"Obstacle trop proche à gauche ({left_distance} cm), virage à droite.")
+            self.turnRight()
+
+        elif right_distance is not None and right_distance < 15:
+            self.logger.info(f"Obstacle trop proche à droite ({right_distance} cm), virage à gauche.")
+            self.turnLeft()
+
+        elif front_distance is not None and front_distance < 20:
+            self.logger.info(f"Obstacle détecté devant à {front_distance} cm")
+            if left_distance is not None and right_distance is not None:
+                if left_distance > right_distance:
+                    self.logger.info("Espace plus libre à gauche, virage à gauche.")
+                    self.turnLeft()
+                else:
+                    self.logger.info("Espace plus libre à droite, virage à droite.")
+                    self.turnRight()
+            elif left_distance is not None:
+                self.turnLeft()
+            elif right_distance is not None:
+                self.turnRight()
+
+        else : 
+            self.motorManager.setSpeed(75)
+            self.motorManager.setAngle(0)
+            time.sleep(1)
 
 
     def countLap(self) -> float:
@@ -80,6 +98,7 @@ class LamboCar:
 
     def stopCar(self):
         self.__motorManager.setSpeed(0)
+        self.__motorManager.setAngle(0)
 
     def reverseGear(self):
         self.logger.info("The car is going forward")
@@ -146,14 +165,14 @@ class LamboCar:
 
     def turnLeft(self):
         self.__motorManager.setSpeed(50)
-        self.__motorManager.setAngle(-100)
+        self.__motorManager.setAngle(-150)
         time.sleep(1)
         self.__motorManager.setSpeed(75)
         self.__motorManager.setAngle(0)
 
     def turnRight(self):
         self.__motorManager.setSpeed(50)
-        self.__motorManager.setAngle(100)
+        self.__motorManager.setAngle(50)
         time.sleep(1)
         self.__motorManager.setSpeed(75)
         self.__motorManager.setAngle(0)
