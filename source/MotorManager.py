@@ -29,46 +29,49 @@ class MotorManager:
         return self.__pwmDriver
 
     def setSpeed(self, speed: float) -> None:
-        """
-        Définit la vitesse des moteurs DC.
+        try:
+            """
+            Définit la vitesse des moteurs DC.
+    
+            :param speed: Valeur comprise entre -100 et 100.
+                          Un signe négatif indique la marche arrière, positif la marche avant, 0 arret.
+            """
+            if isinstance(speed, int) or isinstance(speed, float):
 
-        :param speed: Valeur comprise entre -100 et 100.
-                      Un signe négatif indique la marche arrière, positif la marche avant, 0 arret.
-        """
-        if isinstance(speed, int) or isinstance(speed, float):
-       
-            front = (speed >= 0)
-            speed_value = abs(speed)
-            
-            dc_duty = int((speed_value / 100.0) * 65535)
-            
-            for motor in self.__dcMotorsPropulsion:
-                if speed_value == 0:
-                    motor.stop()
-                    print("Speed is 0, motors stopped.")
-                    self.logging.info("Motor stopped.")
-                else:
-                    motor.setDirection(front)
-                    self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
-                    if front:
-                        print(f"Motors are moving forward at {speed_value}%.")
+                front = (speed >= 0)
+                speed_value = abs(speed)
+
+                dc_duty = int((speed_value / 100.0) * 65535)
+
+                for motor in self.__dcMotorsPropulsion:
+                    if speed_value == 0:
+                        motor.stop()
+                        print("Speed is 0, motors stopped.")
+                        self.logging.info("Motor stopped.")
                     else:
-                        print(f"Motors are moving backward at {speed_value}%.")
-        else:
-            self.logging.error("Speed must be an integer or float.")
-            raise ValueError("Speed must be an integer or float.")
+                        motor.setDirection(front)
+                        self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
+                        if front:
+                            print(f"Motors are moving forward at {speed_value}%.")
+                        else:
+                            print(f"Motors are moving backward at {speed_value}%.")
+            else:
+                raise ValueError("Speed must be an integer or float.")
+        except ValueError as e:
+            self.logging.error(e)
         
     def setAngle(self, steering:float) -> None:
-
-        """
-        Définit l'angle pour le servo de direction. :param steering: Pourcentage de braquage de -100 (pleine gauche) à 100 (pleine droite), 0(tout droit).
-        """
-        if isinstance(steering, int) or isinstance(steering, float):
-            servo_duty = self.convert_steering_to_duty(steering)
-            self.__pwmDriver.channels[self.__servoDirection.boardChannel].duty_cycle = servo_duty
-        else:
-            self.logging.error("Steering must be an integer or float.")
-            raise ValueError("Steering must be an integer or float.")
+        try:
+            """
+            Définit l'angle pour le servo de direction. :param steering: Pourcentage de braquage de -100 (pleine gauche) à 100 (pleine droite), 0(tout droit).
+            """
+            if isinstance(steering, int) or isinstance(steering, float):
+                servo_duty = self.convert_steering_to_duty(steering)
+                self.__pwmDriver.channels[self.__servoDirection.boardChannel].duty_cycle = servo_duty
+            else:
+                raise ValueError("Steering must be an integer or float.")
+        except ValueError as e:
+            self.logging.error(e)
 
     def convert_steering_to_duty(self, steering: float) -> int:
         """
