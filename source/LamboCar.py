@@ -15,7 +15,7 @@ setup_logging()
 class LamboCar:
     def __init__(self, i2c_bus: busio.I2C):
         self.__carName = "LamboCar"
-        self.__sensorManager = None
+        self.__sensorManager = SensorManager(i2c_bus)
         self.__motorManager = MotorManager(i2c_bus)
         self.__totalLaps = 0
         self.__lastLapDuration = 0
