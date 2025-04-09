@@ -50,8 +50,23 @@ class LamboCar:
     def selectMode(self) -> str:
         pass
 
-    def detectObstacle(self) -> None:
-        pass
+    def detectObstacle(self) -> bool:
+
+        distances = self.sensorManager.getDistance()
+        front_distance = distances[0]  
+        left_distance = distances[1]
+        right_distance = distances[2]
+        
+        if front_distance is not None and front_distance < 30:
+            return "Front"
+        
+        elif left_distance is not None and left_distance< 20:
+            return "Left"
+    
+        elif right_distance is not None and left_distance < 20:
+            return "Right"
+        return False
+
 
     def countLap(self) -> float:
         pass
@@ -93,9 +108,10 @@ class LamboCar:
             self.__motorManager.setSpeed(-25)
             time.sleep(1)
             self.__motorManager.setAngle(20)
-            self.__motorManager.setSpeed(20)
+            self.__motorManager.setSpeed(10)
             time.sleep(1)
 
+        self.__motorManager.setAngle(0)
         self.__motorManager.setSpeed(40)
         time.sleep(1)
         self.__motorManager.setSpeed(0)
