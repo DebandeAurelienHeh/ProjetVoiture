@@ -90,13 +90,14 @@ class LamboCar:
     def uTurn(self):
         for i in range(4):
             self.__motorManager.setAngle(-100)
-            self.__motorManager.setSpeed(-20)
+            self.__motorManager.setSpeed(-25)
             time.sleep(1)
-            self.__motorManager.setAngle(0)
+            self.__motorManager.setAngle(20)
             self.__motorManager.setSpeed(20)
+            time.sleep(1)
 
         self.__motorManager.setSpeed(40)
-        time.sleep(2)
+        time.sleep(1)
         self.__motorManager.setSpeed(0)
 
     def circle(self, direction: str):
