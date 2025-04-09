@@ -188,14 +188,17 @@ class LamboCar:
         self.logger.info("Servo motors : Ok!")
 
 
-i2c_bus = busio.I2C(board.SCL, board.SDA)
-lambo = LamboCar(i2c_bus)
+def main():
+    i2c_bus = busio.I2C(board.SCL, board.SDA)
+    lambo = LamboCar(i2c_bus)
+    lambo.prepareMotors()
+    time.sleep(2)
+    lambo.reverseGear()
+    print("Reversing gear done")
+    lambo.eightTurn(1)
+    print("Eight turn done")
+    lambo.uTurn()
+    print("U turn done")
 
-lambo.prepareMotors()
-time.sleep(2)
-lambo.reverseGear()
-print("Reversing gear done")
-lambo.eightTurn(1)
-print("Eight turn done")
-lambo.uTurn()
-print("U turn done")
+if __name__ == "__main__":
+    main()
