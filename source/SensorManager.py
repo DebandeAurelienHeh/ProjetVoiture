@@ -13,9 +13,9 @@ class SensorManager:
     
     def getDistance(self) -> tuple:
         """
-        Renvoie un tuple des distances (Front, Left, Right) en cm.
-        Pour chaque capteur, 5 mesures sont effectuées et la moyenne des lectures valides est calculée.
-        En cas d'erreur, la mesure sera ignorée.
+        Get the distance from the three sensors (front, left, right) using threading.
+        Each sensor's reading is averaged over 5 attempts to ensure accuracy.
+        The results are returned as a tuple in the order of (front, left, right).
         """
         results = [None, None, None]
 
@@ -44,7 +44,3 @@ class SensorManager:
             thread.join()
         return tuple(results)
 
-i2c_bus = busio.I2C(board.SCL, board.SDA)
-sensor_manager = SensorManager(i2c_bus)
-while True:
-    print(sensor_manager.getDistance())
