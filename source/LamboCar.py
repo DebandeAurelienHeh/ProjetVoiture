@@ -3,11 +3,13 @@ from MotorManager import MotorManager
 import logging
 import busio
 import board
-#from logs_config import setup_logging
+from logs_config import setup_logging
+
 """
 Launch the logs functionality to log the informations in the file logs
 """
-#setup_logging()
+setup_logging()
+
 
 class LamboCar:
     def __init__(self, i2c_bus: busio.I2C):
@@ -43,7 +45,7 @@ class LamboCar:
 
     @property
     def lastLapDuration(self):
-        return self.__lastLapDuration          
+        return self.__lastLapDuration
 
     def selectMode(self) -> str:
         pass
@@ -65,6 +67,7 @@ class LamboCar:
         self.__motorManager.setSpeed(0)
 
     def reverseGear(self):
+        self.logger.info("The car is going forward")
         self.__motorManager.setSpeed(25)
         time.sleep(2)
         self.__motorManager.setSpeed(50)
@@ -72,7 +75,9 @@ class LamboCar:
         self.__motorManager.setSpeed(75)
         time.sleep(1)
         self.__motorManager.setSpeed(0)
+        self.logger.info("The car is stopping")
         time.sleep(2)
+        self.logger.info("The car is going backward")
         self.__motorManager.setSpeed(-25)
         time.sleep(2)
         self.__motorManager.setSpeed(-50)
@@ -80,12 +85,19 @@ class LamboCar:
         self.__motorManager.setSpeed(-75)
         time.sleep(1)
         self.__motorManager.setSpeed(0)
+        self.logger.info("The car is stopping")
 
     def uTurn(self):
-        self.__motorManager.setSpeed(50) 
-        self.__motorManager.setAngle(-100)   
-        time.sleep(5)
-        self.__motorManager.setSpeed(75) 
+        for i in range(4):
+            self.__motorManager.setAngle(-100)
+            self.__motorManager.setSpeed(-20)
+            time.sleep(1)
+            self.__motorManager.setAngle(0)
+            self.__motorManager.setSpeed(20)
+
+        self.__motorManager.setSpeed(40)
+        time.sleep(2)
+        self.__motorManager.setSpeed(0)
 
     def circle(self, direction: str):
         self.__motorManager.setSpeed(50)
@@ -103,7 +115,7 @@ class LamboCar:
         self.__motorManager.setSpeed(0)
 
     def eightTurn(self, duration: int):
-        self.__motorManager.setSpeed(40)  
+        self.__motorManager.setSpeed(40)
         for _ in range(duration):
             self.__motorManager.setAngle(-100)
             self.logger.info("eightTurn: Turning left")
@@ -111,16 +123,16 @@ class LamboCar:
             self.__motorManager.setAngle(90)
             self.logger.info("eightTurn: Turning right")
             time.sleep(6)
-        
+
         self.__motorManager.setAngle(0)
         self.__motorManager.setSpeed(0)
 
     def turnLeft(self):
-        self.__motorManager.setSpeed(50)     
-        self.__motorManager.setAngle(-100)    
-        time.sleep(1) 
-        self.__motorManager.setSpeed(75)                     
-        self.__motorManager.setAngle(0)       
+        self.__motorManager.setSpeed(50)
+        self.__motorManager.setAngle(-100)
+        time.sleep(1)
+        self.__motorManager.setSpeed(75)
+        self.__motorManager.setAngle(0)
 
     def turnRight(self):
         self.__motorManager.setSpeed(50)
@@ -142,6 +154,7 @@ class LamboCar:
         self.__motorManager.setSpeed(0)
         time.sleep(0.5)
         print("Motors DC are prepared")
+        self.logger.info("Motors DC : Ok!")
 
         print("Preparing Servo motors...")
         self.__motorManager.setAngle(0)
@@ -155,6 +168,7 @@ class LamboCar:
         self.__motorManager.setAngle(0)
         time.sleep(1)
         print("Servo motors are prepared")
+        self.logger.info("Servo motors : Ok!")
 
 
 i2c_bus = busio.I2C(board.SCL, board.SDA)
@@ -166,3 +180,5 @@ lambo.reverseGear()
 print("Reversing gear done")
 lambo.eightTurn(1)
 print("Eight turn done")
+lambo.uTurn()
+print("U turn done")
