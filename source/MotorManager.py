@@ -4,6 +4,7 @@ import adafruit_pca9685
 import busio
 import board
 import time
+import logging
 
 
 class MotorManager:
@@ -13,6 +14,7 @@ class MotorManager:
         self.__i2c_bus = i2c_bus
         self.__pwmDriver = adafruit_pca9685.PCA9685(self.__i2c_bus, address=0x40)
         self.__pwmDriver.frequency = 60
+        self.logging = logging.getLogger(__name__)
 
     @property
     def dcMotorsPropulsion(self):
@@ -27,7 +29,6 @@ class MotorManager:
         return self.__pwmDriver
 
     def setSpeed(self, speed: float) -> None:
-
         """
         Définit la vitesse des moteurs DC.
 
@@ -35,16 +36,17 @@ class MotorManager:
                       Un signe négatif indique la marche arrière, positif la marche avant, 0 arret.
         """
         if isinstance(speed, int) or isinstance(speed, float):
-
+       
             front = (speed >= 0)
             speed_value = abs(speed)
-
+            
             dc_duty = int((speed_value / 100.0) * 65535)
-
+            
             for motor in self.__dcMotorsPropulsion:
                 if speed_value == 0:
                     motor.stop()
                     print("Speed is 0, motors stopped.")
+                    self.logging.info("Motor stopped.")
                 else:
                     motor.setDirection(front)
                     self.__pwmDriver.channels[motor.pinEnable].duty_cycle = dc_duty
@@ -52,11 +54,11 @@ class MotorManager:
                         print(f"Motors are moving forward at {speed_value}%.")
                     else:
                         print(f"Motors are moving backward at {speed_value}%.")
-
         else:
+            self.logging.error("Speed must be an integer or float.")
             raise ValueError("Speed must be an integer or float.")
-
-    def setAngle(self, steering: float) -> None:
+        
+    def setAngle(self, steering:float) -> None:
 
         """
         Définit l'angle pour le servo de direction. :param steering: Pourcentage de braquage de -100 (pleine gauche) à 100 (pleine droite), 0(tout droit).
@@ -65,13 +67,14 @@ class MotorManager:
             servo_duty = self.convert_steering_to_duty(steering)
             self.__pwmDriver.channels[self.__servoDirection.boardChannel].duty_cycle = servo_duty
         else:
+            self.logging.error("Steering must be an integer or float.")
             raise ValueError("Steering must be an integer or float.")
 
     def convert_steering_to_duty(self, steering: float) -> int:
         """
         Convertit un pourcentage de braquage (de -100 à 100) en une valeur duty_cycle (0 à 65535)
         pour un servo dont la plage mécanique est limitée autour du centre.
-
+        
         Paramètres :
         - steering: pourcentage de braquage (-100 à 100)
         - center_angle: l'angle central du servo (en degrés), typiquement 90°.
