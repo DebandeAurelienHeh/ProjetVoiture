@@ -3,6 +3,7 @@ from MotorManager import MotorManager
 import logging
 import busio
 import board
+from SensorManager import SensorManager
 from logs_config import setup_logging
 
 """
@@ -52,20 +53,15 @@ class LamboCar:
 
     def detectObstacle(self):
 
-        distances = self.sensorManager.getDistance()
-        front_distance = distances[0]
-        left_distance = distances[1]
-        right_distance = distances[2]
-
         if left_distance is not None and left_distance < 15:
             self.logger.info(f"Obstacle trop proche à gauche ({left_distance} cm), virage à droite.")
             self.turnRight()
 
-        if right_distance is not None and right_distance < 15:
+        elif right_distance is not None and right_distance < 15:
             self.logger.info(f"Obstacle trop proche à droite ({right_distance} cm), virage à gauche.")
             self.turnLeft()
 
-        if front_distance is not None and front_distance < 20:
+        elif front_distance is not None and front_distance < 20:
             self.logger.info(f"Obstacle détecté devant à {front_distance} cm")
             if left_distance is not None and right_distance is not None:
                 if left_distance > right_distance:
@@ -78,6 +74,11 @@ class LamboCar:
                 self.turnLeft()
             elif right_distance is not None:
                 self.turnRight()
+
+        else : 
+            self.motorManager.setSpeed(75)
+            self.motorManager.setAngle(0)
+            time.sleep(1)
 
 
     def countLap(self) -> float:
