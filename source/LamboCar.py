@@ -52,6 +52,11 @@ class LamboCar:
         pass
 
     def detectObstacle(self):
+        distances = self.sensorManager.getDistance()
+        front_distance = distances[0]
+        left_distance = distances[1]
+        right_distance = distances[2]
+
 
         if left_distance is not None and left_distance < 15:
             self.logger.info(f"Obstacle trop proche à gauche ({left_distance} cm), virage à droite.")
