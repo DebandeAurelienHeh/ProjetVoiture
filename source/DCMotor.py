@@ -35,4 +35,3 @@ class DCMotor:
         GPIO.output(self.__pinInput1, GPIO.HIGH)
         GPIO.output(self.__pinInput2, GPIO.HIGH)
 
-

@@ -18,6 +18,7 @@ class MotorManager():
         
         :param speed: Valeur comprise entre -100 et 100.
                       Un signe négatif indique la marche arrière, positif la marche avant, 0 arret.
+        
         """
         if isinstance(speed, int) or isinstance(speed, float):
        
