@@ -14,9 +14,10 @@ class SensorManager:
         self.__distSensorFront = DistanceSensor(6,5,'Front')
         self.__distSensorLeft = DistanceSensor(11,9,'Left')
         self.__distSensorRight = DistanceSensor(26,19,'Right')
-        self.__rgbSensor = RGBSensor(self.__i2c_bus)
-        self.__inaSensor = INASensor(self.__i2c_bus)
         self.__isOnLine = False
+        self.__inaSensor = INASensor(bus_i2C)
+        self.__rgbSensor = RGBSensor(bus_i2C)
+
 
     def detectLine(self) -> bool:
         """
@@ -118,13 +119,13 @@ class SensorManager:
 i2c_bus = busio.I2C(board.SCL, board.SDA)
 sensor_manager = SensorManager(i2c_bus)
 while True:
-    print("Current:", sensor_manager.getCurrent())
+   """ print("Current:", sensor_manager.getCurrent())
     time.sleep(1)
     print( "RGB:", sensor_manager.__rgbSensor.readValue())
     time.sleep(1)
     print("IS GREEN :", sensor_manager.isGreen())
     time.sleep(1)
     print("IS RED :", sensor_manager.isRed())
-    time.sleep(1)
+    time.sleep(1)<
     print("Distance:", sensor_manager.getDistance())
-    time.sleep(5)
+    time.sleep(5)"""
