@@ -61,19 +61,20 @@ class LamboCar:
                 front_distance = distances[0]
                 left_distance = distances[1]
                 right_distance = distances[2]
-                self.motorManager.setSpeed(25)
+
+                self.motorManager.setSpeed(60)
                 self.motorManager.setAngle(0)
-                time.sleep(1)
+
+                for _ in range(5):
+                    time.sleep(0.1)
 
                 if left_distance is not None and left_distance < 20:
                     self.logger.info(f"Obstacle à gauche ({left_distance} cm), virage à droite.")
                     self.turnRight()
-
                 elif right_distance is not None and right_distance < 20:
                     self.logger.info(f"Obstacle à droite ({right_distance} cm), virage à gauche.")
                     self.turnLeft()
-
-                elif front_distance is not None and front_distance < 20:
+                elif front_distance is not None and front_distance < 30:
                     self.logger.info(f"Obstacle devant ({front_distance} cm)")
                     if left_distance is not None and right_distance is not None:
                         if left_distance > right_distance:
@@ -85,7 +86,8 @@ class LamboCar:
                     elif right_distance is not None:
                         self.turnRight()
 
-            time.sleep(0.5) 
+            for _ in range(5):
+                time.sleep(0.1)
 
     def countLap(self) -> float:
         pass
@@ -220,7 +222,7 @@ def main():
 
     try:
         while True:
-            time.sleep(1) 
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Arrêt manuel détecté, arrêt de la voiture.")
         lambo.stopCar()
