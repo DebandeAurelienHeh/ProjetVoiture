@@ -6,14 +6,19 @@ import os
 
 class TestLogs(unittest.TestCase):
     def setUp(self):
-        today_str = str(datetime.datetime.now().date())
+
         log_dir = "logs"
         os.makedirs(log_dir, exist_ok=True)
+        log_path=os.path.join(
+                log_dir,
+                f"LamboCar_{datetime.datetime.now().date()}.log"
+                )
 
         logging.basicConfig(
-            filename=os.path.join(log_dir, f"LamboCar_{today_str}.log"),
-            level=logging.INFO,
+            filename=log_path,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=logging.INFO,
+            filemode='a',
         )
 
         self.logger = logging.getLogger(__name__)
