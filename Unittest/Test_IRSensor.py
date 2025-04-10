@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from sensors import LineSensor
-from sensormanager import SensorManager 
+from sensormanager import SensorManager
 
 class TestDetectLineFromSensorManager(unittest.TestCase):
 
