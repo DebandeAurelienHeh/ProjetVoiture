@@ -57,9 +57,9 @@ class LamboCar:
         while True:
             with self.__lock:
                 distances = self.sensorManager.getDistance()
-                front_distance = distances[0]
-                left_distance = distances[1]
-                right_distance = distances[2]
+                front_distance = distances.front
+                left_distance = distances.left
+                right_distance = distances.right
 
                 self.motorManager.setSpeed(60)
                 self.motorManager.setAngle(0)

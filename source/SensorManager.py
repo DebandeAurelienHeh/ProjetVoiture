@@ -2,6 +2,7 @@ from LineSensor import LineSensor
 from DistanceSensor import DistanceSensor
 from RGBSensor import RGBSensor
 from INASensor import INASensor
+from data.DistanceData import DistanceData
 import threading
 import busio
 import board
@@ -34,7 +35,7 @@ class SensorManager:
             print("Erreur lors de la détection de la ligne:", e)
         return False
     
-    def getDistance(self) -> tuple:
+    def getDistance(self) -> DistanceData:
         """
         Return a tuple of the distances measured by the three distance sensors.
         The tuple contains:
@@ -68,7 +69,9 @@ class SensorManager:
             thread.start()
         for thread in threads:
             thread.join()
-        return tuple(results)
+
+        data = DistanceData(results[0], results[1], results[2])
+        return data
 
     def getCurrent(self) -> float:
         """
@@ -88,7 +91,10 @@ class SensorManager:
         the green and red values is greater than G_R_DeltaMinimum.
         """
         try:
-            r, g, b = self.__rgbSensor.readValue()
+            data = self.__rgbSensor.readValue()
+            r = data.red
+            g = data.green
+            b = data.blue
             if r < redMinimum:
                 return False
             if (r - g) < G_R_DeltaMinimum:
