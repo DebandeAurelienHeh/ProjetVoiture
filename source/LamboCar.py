@@ -53,7 +53,6 @@ class LamboCar:
     def selectMode(self) -> str:
         pass
 
-
     def detectObstacle(self):
         while True:
             with self.__lock:
@@ -68,14 +67,14 @@ class LamboCar:
                 for _ in range(5):
                     time.sleep(0.1)
 
-                if left_distance is not None and left_distance < 20:
-                    self.logger.info(f"Obstacle à gauche ({left_distance} cm), virage à droite.")
+                if left_distance is not None and left_distance < 15:
+                    self.logger.info(f"Left obstacle({left_distance} cm)")
                     self.turnRight()
-                elif right_distance is not None and right_distance < 20:
-                    self.logger.info(f"Obstacle à droite ({right_distance} cm), virage à gauche.")
+                elif right_distance is not None and right_distance < 15:
+                    self.logger.info(f"Right obstacle({right_distance} cm)")
                     self.turnLeft()
                 elif front_distance is not None and front_distance < 30:
-                    self.logger.info(f"Obstacle devant ({front_distance} cm)")
+                    self.logger.info(f"Front obstacle ({front_distance} cm)")
                     if left_distance is not None and right_distance is not None:
                         if left_distance > right_distance:
                             self.turnLeft()
@@ -168,15 +167,15 @@ class LamboCar:
 
     def turnLeft(self):
         self.__motorManager.setSpeed(50)
-        self.__motorManager.setAngle(-150)
-        time.sleep(1)
+        self.__motorManager.setAngle(-50)
+        time.sleep(0.5)
         self.__motorManager.setSpeed(75)
         self.__motorManager.setAngle(0)
 
     def turnRight(self):
         self.__motorManager.setSpeed(50)
         self.__motorManager.setAngle(50)
-        time.sleep(1)
+        time.sleep(0.5)
         self.__motorManager.setSpeed(75)
         self.__motorManager.setAngle(0)
 
@@ -224,7 +223,7 @@ def main():
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Arrêt manuel détecté, arrêt de la voiture.")
+        print("Stop od the car.")
         lambo.stopCar()
 
 if __name__ == "__main__":
