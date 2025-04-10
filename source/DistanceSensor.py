@@ -56,5 +56,4 @@ class DistanceSensor(Sensor):
             print(f"[{self.__side}] Erreur : {e}")
             self.logger.error(f"[{self.__side}] Erreur : {e}")
             return None
-
-    
+        

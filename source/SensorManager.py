@@ -49,8 +49,9 @@ class SensorManager:
                 raise ValueError(f"Unexpected value returned by IR sensor: {value}")
 
         except Exception as e:
-            raise e  
-
+            print("Erreur lors de la détection de la ligne:", e)
+        return False
+  
     def getDistance(self) -> DistanceData:
         """
         Collects average distance measurements from three ultrasonic sensors
@@ -100,7 +101,10 @@ class SensorManager:
         Returns True if red value is high and significantly greater than green.
         """
         try:
-            r, g, b = self.__rgbSensor.readValue()
+            data = self.__rgbSensor.readValue()
+            r = data.red
+            g = data.green
+            b = data.blue
             if r < redMinimum or (r - g) < G_R_DeltaMinimum:
                 return False
             return True

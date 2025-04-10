@@ -5,6 +5,7 @@ import busio
 import board
 from SensorManager import SensorManager
 from logs_config import setup_logging
+import threading
 
 """
 Launch the logs functionality to log the informations in the file logs
@@ -23,6 +24,7 @@ class LamboCar:
         self.__constConfig = {}
         self.__mode = None
         self.logger = logging.getLogger(__name__)
+        self.__lock = threading.RLock()
 
     @property
     def motorManager(self):
@@ -52,39 +54,39 @@ class LamboCar:
         pass
 
     def detectObstacle(self):
-        distances = self.sensorManager.getDistance()
-        front_distance = distances[0]
-        left_distance = distances[1]
-        right_distance = distances[2]
+        while True:
+            with self.__lock:
+                distances = self.sensorManager.getDistance()
+                front_distance = distances.front
+                left_distance = distances.left
+                right_distance = distances.right
 
+                self.motorManager.setSpeed(60)
+                self.motorManager.setAngle(0)
 
-        if left_distance is not None and left_distance < 15:
-            self.logger.info(f"Obstacle trop proche à gauche ({left_distance} cm), virage à droite.")
-            self.turnRight()
+                for _ in range(5):
+                    time.sleep(0.1)
 
-        elif right_distance is not None and right_distance < 15:
-            self.logger.info(f"Obstacle trop proche à droite ({right_distance} cm), virage à gauche.")
-            self.turnLeft()
-
-        elif front_distance is not None and front_distance < 20:
-            self.logger.info(f"Obstacle détecté devant à {front_distance} cm")
-            if left_distance is not None and right_distance is not None:
-                if left_distance > right_distance:
-                    self.logger.info("Espace plus libre à gauche, virage à gauche.")
-                    self.turnLeft()
-                else:
-                    self.logger.info("Espace plus libre à droite, virage à droite.")
+                if left_distance is not None and left_distance < 15:
+                    self.logger.info(f"Left obstacle({left_distance} cm)")
                     self.turnRight()
-            elif left_distance is not None:
-                self.turnLeft()
-            elif right_distance is not None:
-                self.turnRight()
+                elif right_distance is not None and right_distance < 15:
+                    self.logger.info(f"Right obstacle({right_distance} cm)")
+                    self.turnLeft()
+                elif front_distance is not None and front_distance < 30:
+                    self.logger.info(f"Front obstacle ({front_distance} cm)")
+                    if left_distance is not None and right_distance is not None:
+                        if left_distance > right_distance:
+                            self.turnLeft()
+                        else:
+                            self.turnRight()
+                    elif left_distance is not None:
+                        self.turnLeft()
+                    elif right_distance is not None:
+                        self.turnRight()
 
-        else : 
-            self.motorManager.setSpeed(75)
-            self.motorManager.setAngle(0)
-            time.sleep(1)
-
+            for _ in range(5):
+                time.sleep(0.1)
 
     def countLap(self) -> float:
         pass
@@ -165,15 +167,15 @@ class LamboCar:
 
     def turnLeft(self):
         self.__motorManager.setSpeed(50)
-        self.__motorManager.setAngle(-150)
-        time.sleep(1)
+        self.__motorManager.setAngle(-50)
+        time.sleep(0.5)
         self.__motorManager.setSpeed(75)
         self.__motorManager.setAngle(0)
 
     def turnRight(self):
         self.__motorManager.setSpeed(50)
         self.__motorManager.setAngle(50)
-        time.sleep(1)
+        time.sleep(0.5)
         self.__motorManager.setSpeed(75)
         self.__motorManager.setAngle(0)
 
@@ -210,14 +212,19 @@ class LamboCar:
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
     lambo = LamboCar(i2c_bus)
+
     lambo.prepareMotors()
     time.sleep(2)
-    lambo.reverseGear()
-    print("Reversing gear done")
-    lambo.eightTurn(1)
-    print("Eight turn done")
-    lambo.uTurn()
-    print("U turn done")
+
+    obstacle_thread = threading.Thread(target=lambo.detectObstacle, daemon=True)
+    obstacle_thread.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Stop od the car.")
+        lambo.stopCar()
 
 if __name__ == "__main__":
     main()
