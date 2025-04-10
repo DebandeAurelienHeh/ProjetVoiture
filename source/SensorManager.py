@@ -2,45 +2,60 @@ from LineSensor import LineSensor
 from DistanceSensor import DistanceSensor
 from RGBSensor import RGBSensor
 from INASensor import INASensor
+from data.DistanceData import DistanceData
 import threading
 import busio
 import board
 import time
 
+
 class SensorManager:
-    def __init__(self,bus_i2C:busio.I2C):
+    def __init__(
+        self,
+        bus_i2C: busio.I2C = None,
+        lineSensor=None,
+        distSensorFront=None,
+        distSensorLeft=None,
+        distSensorRight=None,
+        inaSensor=None,
+        rgbSensor=None
+    ):
         self.__i2c_bus = bus_i2C
-        self.__lineSensor = LineSensor(20)
-        self.__distSensorFront = DistanceSensor(6,5,'Front')
-        self.__distSensorLeft = DistanceSensor(11,9,'Left')
-        self.__distSensorRight = DistanceSensor(26,19,'Right')
-        self.__rgbSensor = RGBSensor(self.__i2c_bus)
-        self.__inaSensor = INASensor(self.__i2c_bus)
+        self.__lineSensor = lineSensor if lineSensor else LineSensor(20)
+        self.__distSensorFront = distSensorFront if distSensorFront else DistanceSensor(6, 5, 'Front')
+        self.__distSensorLeft = distSensorLeft if distSensorLeft else DistanceSensor(11, 9, 'Left')
+        self.__distSensorRight = distSensorRight if distSensorRight else DistanceSensor(26, 19, 'Right')
         self.__isOnLine = False
+        self.__inaSensor = inaSensor if inaSensor else INASensor(bus_i2C)
+        self.__rgbSensor = rgbSensor if rgbSensor else RGBSensor(bus_i2C)
 
     def detectLine(self) -> bool:
         """
-        Detecte if the car is on the line.
-        Return True if the car is on the line, False otherwise.
+        Detect whether the car is currently over a line.
+        Returns True if the IR sensor reads 0 (line detected),
+        False if it reads 1 (no line),
+        Raises ValueError for any unexpected value.
         """
         try:
-            if not self.__isOnLine and self.__lineSensor.readValue():
+            value = self.__lineSensor.readValue()
+
+            if value == 0:
                 self.__isOnLine = True
                 return True
-            elif self.__isOnLine and not self.__lineSensor.readValue():
+            elif value == 1:
                 self.__isOnLine = False
+                return False
+            else:
+                raise ValueError(f"Unexpected value returned by IR sensor: {value}")
+
         except Exception as e:
-            print("Erreur lors de la détection de la ligne:", e)
-        return False
-    
-    def getDistance(self) -> tuple:
+            raise e  
+
+    def getDistance(self) -> DistanceData:
         """
-        Return a tuple of the distances measured by the three distance sensors.
-        The tuple contains:
-        - distanceFront
-        - distanceLeft
-        - distanceRight
-        Test 5 times the distance and return the average.
+        Collects average distance measurements from three ultrasonic sensors
+        using threading to speed up parallel reads.
+        Returns a DistanceData object with front, left, and right distances.
         """
         results = [None, None, None]
 
@@ -50,11 +65,8 @@ class SensorManager:
                 value = sensor.readValue()
                 if value is not None:
                     readings.append(value)
-                time.sleep(0.01) 
-            if readings:
-                avg = round(sum(readings) / len(readings),1)
-            else:
-                avg = None 
+                time.sleep(0.01)
+            avg = round(sum(readings) / len(readings), 1) if readings else None
             results[index] = avg
 
         threads = [
@@ -62,69 +74,66 @@ class SensorManager:
             threading.Thread(target=wrapper, args=(self.__distSensorLeft, 1)),
             threading.Thread(target=wrapper, args=(self.__distSensorRight, 2))
         ]
-        
+
         for thread in threads:
             thread.start()
         for thread in threads:
             thread.join()
-        return tuple(results)
+
+        return DistanceData(results[0], results[1], results[2])
 
     def getCurrent(self) -> float:
         """
-        Return the current measured by the INA219 sensor. If the sensor is not connected, return None.
+        Retrieves the electrical current measured by the INA219 sensor.
+        Returns the current in milliamps, or None if unavailable.
         """
         try:
             sensorData = self.__inaSensor.readValue()
             return sensorData.get('Current', None)
         except Exception as e:
-            print("Error while reading the sensor ", e)
+            print("Error while reading current sensor:", e)
             return None
-    
-    def isRed(self,redMinimum:int =150,G_R_DeltaMinimum:int =30) -> bool:
+
+    def isRed(self, redMinimum: int = 150, G_R_DeltaMinimum: int = 30) -> bool:
         """
-        Detect if the color is red.
-        The color is red if the red value is greater than redMinimum and the difference between 
-        the green and red values is greater than G_R_DeltaMinimum.
+        Detects red color from RGB sensor data.
+        Returns True if red value is high and significantly greater than green.
         """
         try:
             r, g, b = self.__rgbSensor.readValue()
-            if r < redMinimum:
-                return False
-            if (r - g) < G_R_DeltaMinimum:
+            if r < redMinimum or (r - g) < G_R_DeltaMinimum:
                 return False
             return True
         except Exception as e:
-            print("Error while detecting a red :", e)
+            print("Error while detecting red color:", e)
             return False
 
-    def isGreen(self,greenMinimum:int = 150,G_R_DeltaMinimum:int = 50) -> bool:
+    def isGreen(self, greenMinimum: int = 150, G_R_DeltaMinimum: int = 50) -> bool:
         """
-        Detect a presence of green.
-        Green is considered detected if:
-          - the value of G is greater than or equal to greenMinimum,
-          - and if the difference (G - R) is greater than or equal to G_R_DeltaMinimum.
+        Detects green color from RGB sensor data.
+        Returns True if green value is high and significantly greater than red.
         """
         try:
             r, g, b = self.__rgbSensor.readValue()
-            if g < greenMinimum:
-                return False
-            if (g - r) < G_R_DeltaMinimum:
+            if g < greenMinimum or (g - r) < G_R_DeltaMinimum:
                 return False
             return True
         except Exception as e:
-            print("Error while detecting the green: ", e)
+            print("Error while detecting green color:", e)
             return False
-        
-i2c_bus = busio.I2C(board.SCL, board.SDA)
-sensor_manager = SensorManager(i2c_bus)
-while True:
-    print("Current:", sensor_manager.getCurrent())
-    time.sleep(1)
-    print( "RGB:", sensor_manager.__rgbSensor.readValue())
-    time.sleep(1)
-    print("IS GREEN :", sensor_manager.isGreen())
-    time.sleep(1)
-    print("IS RED :", sensor_manager.isRed())
-    time.sleep(1)
-    print("Distance:", sensor_manager.getDistance())
-    time.sleep(5)
+
+if __name__ == "__main__":
+    i2c_bus = busio.I2C(board.SCL, board.SDA)
+    sensor_manager = SensorManager(i2c_bus)
+
+    while True:
+        print("Current:", sensor_manager.getCurrent())
+        time.sleep(1)
+        print("RGB:", sensor_manager._SensorManager__rgbSensor.readValue())
+        time.sleep(1)
+        print("IS GREEN:", sensor_manager.isGreen())
+        time.sleep(1)
+        print("IS RED:", sensor_manager.isRed())
+        time.sleep(1)
+        print("Distance:", sensor_manager.getDistance())
+        time.sleep(5)
