@@ -1,4 +1,4 @@
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 class DCMotor:
     def __init__(self, enable, input1, input2):
@@ -25,11 +25,11 @@ class DCMotor:
 
     def setDirection(self, direction):
         if direction:
-            GPIO.output(self.__pinInput1, GPIO.HIGH)
-            GPIO.output(self.__pinInput2, GPIO.LOW)
-        elif not direction:
             GPIO.output(self.__pinInput1, GPIO.LOW)
             GPIO.output(self.__pinInput2, GPIO.HIGH)
+        elif not direction:
+            GPIO.output(self.__pinInput1, GPIO.HIGH)
+            GPIO.output(self.__pinInput2, GPIO.LOW)
 
     def stop(self):
         GPIO.output(self.__pinInput1, GPIO.HIGH)
