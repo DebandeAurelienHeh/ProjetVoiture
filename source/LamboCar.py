@@ -206,6 +206,66 @@ class LamboCar:
         print("Servo motors are prepared")
         self.logger.info("Servo motors : Ok!")
 
+    def stayMid(self):
+        """
+        Adjust the car's speed and direction to stay centered between obstacles.
+
+        This method uses three ultrasonic sensors (front, left, right) to determine the position 
+        of the vehicle relative to its environment. Based on the distances, it calculates a new 
+        steering angle and speed to keep the car centered while avoiding frontal collisions.
+
+        Safety checks ensure the car stops if an obstacle is detected too close in front, 
+        or if sensor data is missing or unreliable.
+
+        Returns:
+            tuple: A tuple (newSpeed, newAngle) indicating the speed (0–100) and angle (-100 to 100)
+                applied to the car's motors.
+        """
+        frontDist, leftDist, rightDist = self.__sensorManager.getDistance()
+
+        # Constants
+        min_front = 20
+        max_front = 100
+        Kp = 10
+
+        # Stop if an obstacle is detected in front or the front sensor fails
+        if frontDist is None or frontDist < min_front:
+            self.__motorManager.setSpeed(0)
+            self.__motorManager.setAngle(0)
+            return (0, 0)
+
+        # Handle cases where side sensors fail
+        if leftDist is None and rightDist is None:
+            self.__motorManager.setSpeed(0)
+            self.__motorManager.setAngle(0)
+            return (0, 0)
+        elif leftDist is None:
+            error = 1  # Slightly steer left to stay away from the unknown right side
+        elif rightDist is None:
+            error = -1  # Slightly steer right to stay away from the unknown left side
+        else:
+            error = rightDist - leftDist
+
+        # Compute steering angle
+        newAngle = max(-100, min(100, Kp * error))
+
+        # Compute speed based on frontal distance
+        try:
+            rawSpeed = (frontDist - min_front) / (max_front - min_front) * 100
+        except ZeroDivisionError:
+            rawSpeed = 0
+
+        newSpeed = max(0, min(100, rawSpeed))
+
+        # Reduce speed in curves
+        correctionFactor = 1 - (abs(newAngle) / 100) * 0.5
+        newSpeed *= correctionFactor
+
+        # Apply motor commands
+        self.__motorManager.setAngle(newAngle)
+        self.__motorManager.setSpeed(newSpeed)
+
+        return (newSpeed, newAngle)
 
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
