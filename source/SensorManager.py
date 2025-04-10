@@ -22,7 +22,7 @@ class SensorManager:
     ):
         self.__i2c_bus = bus_i2C
         self.__lineSensor = lineSensor if lineSensor else LineSensor(20)
-        self.__distSensorFront = distSensorFront if distSensorFront else DistanceSensor(6, 5, 'Front')
+        self.__distSensorFront = distSensorFront if distSensorFront else DistanceSensor(16, 25, 'Front')
         self.__distSensorLeft = distSensorLeft if distSensorLeft else DistanceSensor(11, 9, 'Left')
         self.__distSensorRight = distSensorRight if distSensorRight else DistanceSensor(26, 19, 'Right')
         self.__isOnLine = False

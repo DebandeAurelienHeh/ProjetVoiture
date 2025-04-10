@@ -6,12 +6,12 @@ class DistanceData:
 
     @property
     def front(self):
-        return self.__front()
+        return self.__front
 
     @property
     def left(self):
-        return self.__left()
+        return self.__left
 
     @property
     def right(self):
-        return self.__right()
+        return self.__right
