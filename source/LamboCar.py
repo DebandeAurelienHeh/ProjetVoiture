@@ -228,9 +228,10 @@ class LamboCar:
         Kp = 10
 
         if frontDist is None or frontDist < min_front:
-            self.__motorManager.setSpeed(0)
+            self.__motorManager.setSpeed(-30)
+            time.sleep(1)                       #ça a été rajouté pour éviter que la voiture ne recule trop
             self.__motorManager.setAngle(0)
-            return (0, 0)
+            return (-30, 0)
 
         if leftDist is None and rightDist is None:
             self.__motorManager.setSpeed(0)
@@ -248,9 +249,10 @@ class LamboCar:
         try:
             rawSpeed = (frontDist - min_front) / (max_front - min_front) * 100
         except ZeroDivisionError:
-            rawSpeed = 0
+            rawSpeed = 10
+            #Moteur n'avancerait pas avec la vitesse trop basse
 
-        newSpeed = max(0, min(100, rawSpeed))
+        newSpeed = max(10, min(100, rawSpeed))
         correctionFactor = 1 - (abs(newAngle) / 100) * 0.5
         newSpeed *= correctionFactor
 
