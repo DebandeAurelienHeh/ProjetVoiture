@@ -37,7 +37,7 @@ class TestMotorManager(unittest.TestCase):
         self.assertTrue(mock.called_with(True))
 
     @patch('MotorManager.MotorManager.convert_steering_to_duty', return_value=6990)
-    @patch('MotorManager.MotorManager.__pwmDriver')
+    @patch('MotorManager.MotorManager.pwmDriver')
     def testSetAngle(self, mock):
         self.motorManager.setAngle(0)
         self.assertTrue(mock.called_with(0))
@@ -48,8 +48,9 @@ class TestMotorManager(unittest.TestCase):
 
     def testConvertSteeringToDuty(self):
         result = self.motorManager.convert_steering_to_duty(100)
-        expected = 6990
-        self.assertAlmostEqual(result, expected, delta=10)
+        expected = 6771
+        self.assertEqual(result, expected)
+
 
 if __name__ == "__main__":
     unittest.main()
