@@ -1,13 +1,17 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'source')))
+
 import unittest
 from unittest.mock import MagicMock
-from sensors import LineSensor
-from sensormanager import SensorManager 
+from LineSensor import LineSensor
+from SensorManager import SensorManager
 
 class TestDetectLineFromSensorManager(unittest.TestCase):
 
     def setUp(self):
         self.mock_sensor = MagicMock(spec=LineSensor)
-        self.manager = SensorManager(lineSensor=self.mock_sensor)
+        self.manager = SensorManager(bus_i2C=None, lineSensor=self.mock_sensor)
 
     def test_detect_line_return_true_on_0(self):
         self.mock_sensor.readValue.return_value = 0
@@ -31,4 +35,4 @@ class TestDetectLineFromSensorManager(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
