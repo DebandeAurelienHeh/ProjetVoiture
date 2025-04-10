@@ -1,6 +1,9 @@
 import unittest
 from unittest.mock import patch
 from DistanceSensor import DistanceSensor
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'source')))
 
 class TestDistanceSensor(unittest.TestCase):
 

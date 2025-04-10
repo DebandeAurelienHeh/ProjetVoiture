@@ -1,15 +1,12 @@
 import time
-from MotorManager import MotorManager
 import logging
+import threading
 import busio
 import board
+from MotorManager import MotorManager
 from SensorManager import SensorManager
 from logs_config import setup_logging
-import threading
 
-"""
-Launch the logs functionality to log the informations in the file logs
-"""
 setup_logging()
 
 
@@ -23,8 +20,10 @@ class LamboCar:
         self.__currentState = ""
         self.__constConfig = {}
         self.__mode = None
-        self.logger = logging.getLogger(__name__)
+        self.__tour = 0
+        self.__last_line_state = False
         self.__lock = threading.RLock()
+        self.logger = logging.getLogger(__name__)
 
     @property
     def motorManager(self):
@@ -50,8 +49,23 @@ class LamboCar:
     def lastLapDuration(self):
         return self.__lastLapDuration
 
-    def selectMode(self) -> str:
-        pass
+    @property
+    def tour(self):
+        return self.__tour
+
+    @property
+    def countLap(self):
+        return self.__tour
+
+    def LineCount(self):
+        try:
+            on_line = self.sensorManager.detectLine()
+            if on_line and not self.__last_line_state:
+                self.__tour += 1
+                self.logger.info(f"Lap counted! Total laps: {self.__tour}")
+            self.__last_line_state = on_line
+        except Exception as e:
+            self.logger.error(f"Error in LineCount: {e}")
 
     def detectObstacle(self):
         while True:
@@ -61,35 +75,37 @@ class LamboCar:
                 left_distance = distances.left
                 right_distance = distances.right
 
-                self.motorManager.setSpeed(60)
+                self.motorManager.setSpeed(50)
                 self.motorManager.setAngle(0)
-
-                for _ in range(5):
-                    time.sleep(0.1)
-
-                if left_distance is not None and left_distance < 15:
-                    self.logger.info(f"Left obstacle({left_distance} cm)")
-                    self.turnRight()
-                elif right_distance is not None and right_distance < 15:
-                    self.logger.info(f"Right obstacle({right_distance} cm)")
-                    self.turnLeft()
-                elif front_distance is not None and front_distance < 30:
-                    self.logger.info(f"Front obstacle ({front_distance} cm)")
-                    if left_distance is not None and right_distance is not None:
-                        if left_distance > right_distance:
-                            self.turnLeft()
-                        else:
-                            self.turnRight()
-                    elif left_distance is not None:
-                        self.turnLeft()
-                    elif right_distance is not None:
-                        self.turnRight()
-
-            for _ in range(5):
                 time.sleep(0.1)
 
-    def countLap(self) -> float:
-        pass
+                if front_distance is not None and front_distance < 30:
+                    self.logger.info(f"Front obstacle detected ({front_distance} cm)")
+                    time.sleep(1)
+
+                    left = left_distance if left_distance is not None else 0
+                    right = right_distance if right_distance is not None else 0
+                    self.logger.info(f"Left: {left} cm, Right: {right} cm")
+
+                    self.motorManager.setSpeed(-40)
+                    time.sleep(0.7)
+                    self.motorManager.setSpeed(0)
+
+                    if left > right:
+                        self.logger.info("Turning left (more space)")
+                        self.turnLeft()
+                    else:
+                        self.logger.info("Turning right (more space)")
+                        self.turnRight()
+
+                elif left_distance is not None and left_distance < 15:
+                    self.logger.info(f"Left obstacle ({left_distance} cm)")
+                    self.turnRight()
+                elif right_distance is not None and right_distance < 15:
+                    self.logger.info(f"Right obstacle ({right_distance} cm)")
+                    self.turnLeft()
+
+            time.sleep(0.1)
 
     def startCar(self):
         self.__motorManager.setSpeed(25)
@@ -124,14 +140,13 @@ class LamboCar:
         self.logger.info("The car is stopping")
 
     def uTurn(self):
-        for i in range(4):
+        for _ in range(4):
             self.__motorManager.setAngle(-100)
             self.__motorManager.setSpeed(-25)
             time.sleep(1)
             self.__motorManager.setAngle(20)
             self.__motorManager.setSpeed(10)
             time.sleep(1)
-
         self.__motorManager.setAngle(0)
         self.__motorManager.setSpeed(40)
         time.sleep(1)
@@ -139,7 +154,6 @@ class LamboCar:
 
     def circle(self, direction: str):
         self.__motorManager.setSpeed(50)
-
         if direction.lower() == "left":
             self.__motorManager.setAngle(-100)
         elif direction.lower() == "right":
@@ -147,7 +161,6 @@ class LamboCar:
         else:
             self.logger.error("Circle: Invalid direction, it must be 'left' or 'right'")
             raise ValueError("Direction must be 'left' or 'right'")
-
         time.sleep(10)
         self.__motorManager.setAngle(0)
         self.__motorManager.setSpeed(0)
@@ -161,23 +174,18 @@ class LamboCar:
             self.__motorManager.setAngle(90)
             self.logger.info("eightTurn: Turning right")
             time.sleep(6)
-
         self.__motorManager.setAngle(0)
         self.__motorManager.setSpeed(0)
 
     def turnLeft(self):
-        self.__motorManager.setSpeed(50)
-        self.__motorManager.setAngle(-50)
+        self.__motorManager.setSpeed(30)
+        self.__motorManager.setAngle(-60)
         time.sleep(0.5)
-        self.__motorManager.setSpeed(75)
-        self.__motorManager.setAngle(0)
 
     def turnRight(self):
-        self.__motorManager.setSpeed(50)
-        self.__motorManager.setAngle(50)
+        self.__motorManager.setSpeed(30)
+        self.__motorManager.setAngle(60)
         time.sleep(0.5)
-        self.__motorManager.setSpeed(75)
-        self.__motorManager.setAngle(0)
 
     def prepareMotors(self):
         print("Preparing DC motors...")
@@ -211,6 +219,46 @@ class LamboCar:
     def start_on_green(self):
         if self.__sensorManager.isGreen():
             self.logger.info("GREEN LIGHT! THE RACE IS ON!")
+
+    def stayMid(self):
+        frontDist, leftDist, rightDist = self.__sensorManager.getDistance()
+
+        min_front = 20
+        max_front = 100
+        Kp = 10
+
+        if frontDist is None or frontDist < min_front:
+            self.__motorManager.setSpeed(0)
+            self.__motorManager.setAngle(0)
+            return (0, 0)
+
+        if leftDist is None and rightDist is None:
+            self.__motorManager.setSpeed(0)
+            self.__motorManager.setAngle(0)
+            return (0, 0)
+        elif leftDist is None:
+            error = 1
+        elif rightDist is None:
+            error = -1
+        else:
+            error = rightDist - leftDist
+
+        newAngle = max(-100, min(100, Kp * error))
+
+        try:
+            rawSpeed = (frontDist - min_front) / (max_front - min_front) * 100
+        except ZeroDivisionError:
+            rawSpeed = 0
+
+        newSpeed = max(0, min(100, rawSpeed))
+        correctionFactor = 1 - (abs(newAngle) / 100) * 0.5
+        newSpeed *= correctionFactor
+
+        self.__motorManager.setAngle(newAngle)
+        self.__motorManager.setSpeed(newSpeed)
+
+        return (newSpeed, newAngle)
+
 
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
