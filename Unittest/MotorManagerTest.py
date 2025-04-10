@@ -6,6 +6,9 @@ import MotorManager as MotorManager
 import adafruit_pca9685
 import busio
 import board
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'source')))
 
 class TestMotorManager(unittest.TestCase):
 
@@ -38,7 +41,7 @@ class TestMotorManager(unittest.TestCase):
 
     @patch('MotorManager.MotorManager.convert_steering_to_duty', return_value=6990)
     @patch('MotorManager.MotorManager.pwmDriver')
-    def testSetAngle(self, mock):
+    def testSetAngle(self, mock, mock2):
         self.motorManager.setAngle(0)
         self.assertTrue(mock.called_with(0))
 

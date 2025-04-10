@@ -2,6 +2,9 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from SensorManager import SensorManager
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'source')))
 
 class TestSensorManager(unittest.TestCase):
 
