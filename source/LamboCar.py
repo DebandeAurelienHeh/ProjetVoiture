@@ -216,6 +216,10 @@ class LamboCar:
         print("Servo motors are prepared")
         self.logger.info("Servo motors : Ok!")
 
+    def start_on_green(self):
+        if self.__sensorManager.isGreen():
+            self.logger.info("GREEN LIGHT! THE RACE IS ON!")
+
     def stayMid(self):
         frontDist, leftDist, rightDist = self.__sensorManager.getDistance()
 
@@ -255,6 +259,7 @@ class LamboCar:
 
         return (newSpeed, newAngle)
 
+
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
     lambo = LamboCar(i2c_bus)
@@ -264,13 +269,13 @@ def main():
 
     obstacle_thread = threading.Thread(target=lambo.detectObstacle, daemon=True)
     obstacle_thread.start()
-
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Stop of the car.")
+        print("Stop the car.")
         lambo.stopCar()
+
 
 if __name__ == "__main__":
     main()

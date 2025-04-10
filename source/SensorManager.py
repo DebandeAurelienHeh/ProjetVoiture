@@ -118,7 +118,10 @@ class SensorManager:
         Returns True if green value is high and significantly greater than red.
         """
         try:
-            r, g, b = self.__rgbSensor.readValue()
+            data = self.__rgbSensor.readValue()
+            r = data.red
+            g = data.green
+            b = data.blue
             if g < greenMinimum or (g - r) < G_R_DeltaMinimum:
                 return False
             return True
