@@ -1,6 +1,6 @@
 from Sensor import Sensor
 import RPi.GPIO as GPIO
-from time import time, sleep
+import time
 
 class LineSensor(Sensor):
     def __init__(self,pinGPIO:int):

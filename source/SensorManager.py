@@ -29,6 +29,10 @@ class SensorManager:
         self.__inaSensor = inaSensor if inaSensor else INASensor(bus_i2C)
         self.__rgbSensor = rgbSensor if rgbSensor else RGBSensor(bus_i2C)
 
+    @property
+    def rgbSensor(self):
+        return self.__rgbSensor
+
     def detectLine(self) -> bool:
         """
         Detect whether the car is currently over a line.

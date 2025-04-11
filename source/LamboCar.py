@@ -221,7 +221,7 @@ class LamboCar:
         all_ready = True  
 
         # ---- RGB Sensor ----
-        data_rgb = self.__sensorManager.__rgbSensor.readValue()
+        data_rgb = self.__sensorManager.rgbSensor.readValue()
         if data_rgb is not None:
             red, green, blue = data_rgb.red, data_rgb.green, data_rgb.blue
             print(f"RGB Sensor: Red: {red}, Green: {green}, Blue: {blue}")
@@ -258,7 +258,7 @@ class LamboCar:
         # ---- Line Sensor ----
         data_line = self.__sensorManager.detectLine()
         if data_line is not None:
-            print(f"Line sensor detects black line: {data_line}")
+            print(f"Line sensor does not detect black line: {data_line}")
             self.logger.info("Line sensor is ready")
             print("Line sensor is ready!")
         else:
@@ -272,11 +272,15 @@ class LamboCar:
             print("Some sensors are not responding!")
             self.logger.error("Some sensors are not responding!")
         return all_ready
-        
+
 
     def start_on_green(self):
         if self.__sensorManager.isGreen():
             self.logger.info("GREEN LIGHT! THE RACE IS ON!")
+            self.stayMid()
+        else:
+            self.logger.info("NOT GREEN YET!")
+            time.sleep(0.5)
 
     def stayMid(self):
         distance = self.__sensorManager.getDistance()
@@ -322,16 +326,28 @@ class LamboCar:
 
         return (newSpeed, newAngle)
 
+    def test(self):
+        self.prepareMotors()
+        time.sleep(1)
+        self.prepareSensors()
+        time.sleep(1)
+        self.start()
 
+    def start(self):
+        self.stayMid()
+
+"""
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
     lambo = LamboCar(i2c_bus)
 
     lambo.prepareMotors()
-    time.sleep(2)
+    time.sleep(1)
+    lambo.prepareSensors()
+    time.sleep(1)
 
-    obstacle_thread = threading.Thread(target=lambo.detectObstacle, daemon=True)
-    obstacle_thread.start()
+    thread = threading.Thread(target=lambo.start_on_green(), daemon=True)
+    thread.start()
     try:
         while True:
             time.sleep(1)
@@ -342,3 +358,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""
