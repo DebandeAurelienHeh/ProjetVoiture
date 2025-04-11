@@ -53,7 +53,7 @@ class SensorManager:
                 raise ValueError(f"Unexpected value returned by IR sensor: {value}")
 
         except Exception as e:
-            print("Erreur lors de la détection de la ligne:", e)
+            print("Error during the detection of the line:", e)
         return False
   
     def getDistance(self) -> DistanceData:
