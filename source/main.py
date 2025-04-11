@@ -20,6 +20,9 @@ def main():
             tours = int(input("How many turns?"))
             lambo.start_on_green(tours)
             ack = False
+        elif command.lower() == "Avoid":
+            lambo.zigzagAvoidance()
+            ack = False
 
 if __name__ == "__main__":
     main()
