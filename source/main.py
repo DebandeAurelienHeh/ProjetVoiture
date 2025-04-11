@@ -13,10 +13,12 @@ def main():
             lambo.test()
             ack = False
         elif command == "start":
-            lambo.startCar()
+            tours = input("How many turns?")
+            lambo.start(tours)
             ack = False
         elif command == "green":
-            lambo.start_on_green()
+            tours = input("How many turns?")
+            lambo.start_on_green(tours)
             ack = False
 
 if __name__ == "__main__":

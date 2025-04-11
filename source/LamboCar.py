@@ -20,7 +20,7 @@ class LamboCar:
         self.__currentState = ""
         self.__constConfig = {}
         self.__mode = None
-        self.__tour = 0
+        self.__tour = -1
         self.__last_line_state = False
         self.__lock = threading.RLock()
         self.logger = logging.getLogger(__name__)
@@ -56,6 +56,10 @@ class LamboCar:
     @property
     def countLap(self):
         return self.__tour
+
+    @tour.setter
+    def tour(self, tour):
+        self.__tour = tour
 
     def LineCount(self):
         try:
@@ -290,13 +294,14 @@ class LamboCar:
             self.logger.error("Some sensors are not responding!")
         return all_ready
 
-    def start_on_green(self):
-        if self.__sensorManager.isGreen():
-            self.logger.info("GREEN LIGHT! THE RACE IS ON!")
-            self.stayMid()
-        else:
-            self.logger.info("NOT GREEN YET!")
-            time.sleep(0.5)
+    def start_on_green(self, tours):
+        while True:
+            if self.__sensorManager.isGreen():
+                self.logger.info("GREEN LIGHT! THE RACE IS ON!")
+                self.start(tours)
+            else:
+                self.logger.info("NOT GREEN YET!")
+                time.sleep(0.5)
 
     def stayMid(self):
         distance = self.__sensorManager.getDistance()
@@ -349,14 +354,33 @@ class LamboCar:
         time.sleep(1)
         self.start()
 
-    def start(self):
+    def start(self, max_tours=1):
+        line_detected = False
         try:
-            while True:
+            while self.tour < max_tours:
                 self.stayMid()
+                if self.sensorManager.detectLine() and not line_detected:
+                    self.tour+=1
+                    line_detected = True
+                elif not self.sensorManager.detectLine():
+                    line_detected = False
                 time.sleep(0.05)
+            self.stopCar()
         except KeyboardInterrupt:
             print("Stop the car.")
             self.stopCar()
+
+
+    """ 
+       def start(self):
+            try:
+                while True:
+                    self.stayMid()
+                    time.sleep(0.05)
+            except KeyboardInterrupt:
+                print("Stop the car.")
+                self.stopCar()
+    """
 
 """
 def main():
