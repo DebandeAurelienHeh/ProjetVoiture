@@ -35,7 +35,7 @@ class LineSensor(Sensor):
                 return False
             
             if time.time() - start_time > timeout:
-                raise TimeoutError("Timeout lors de l'attente d'une valeur GPIO valide.")
+                raise TimeoutError("Timeout waiting for a valid GPIO value")
             
             time.sleep(0.001)
 

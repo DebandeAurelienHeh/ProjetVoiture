@@ -15,12 +15,12 @@ class TestDetectLineFromSensorManager(unittest.TestCase):
     def test_detect_line_return_true_on_0(self):
         self.mock_sensor.readValue.return_value = 0
         result = self.manager.detectLine()
-        self.assertTrue(result, "detectLine() doit retourner True si readValue() == 0")
+        self.assertTrue(result, "detectLine() must return True if readValue() == 0")
 
     def test_detect_line_return_false_on_1(self):
         self.mock_sensor.readValue.return_value = 1
         result = self.manager.detectLine()
-        self.assertFalse(result, "detectLine() doit retourner False si readValue() == 1")
+        self.assertFalse(result, "detectLine() must return False if readValue() == 1")
 
     def test_detect_line_invalid_value(self):
         self.mock_sensor.readValue.return_value = "???"

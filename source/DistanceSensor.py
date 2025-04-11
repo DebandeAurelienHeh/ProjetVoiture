@@ -46,8 +46,8 @@ class DistanceSensor(Sensor):
             while GPIO.input(self.__pinEcho) == 0:
                 start_time = time.time()
                 if start_time > timeout:
-                    self.logger.error("Start of the signal is too long.")
-                    raise TimeoutError("Start of the signal is too long.")
+                    self.logger.error("Start signal is too long.")
+                    raise TimeoutError("Start signal is too long.")
 
             stop_time = time.time()
             timeout = stop_time + 0.05
@@ -65,8 +65,8 @@ class DistanceSensor(Sensor):
             distance = round(duration * 17150, 2)
 
             if distance < 2 or distance > 400:
-                self.logger.error(f"Out of range : {distance} cm")
-                raise ValueError(f"Out of range : {distance} cm")
+                self.logger.error(f"Distance out of range: {distance} cm")
+                raise ValueError(f"Distance out of range: {distance} cm")
             
             return distance
 

@@ -32,10 +32,12 @@ class MotorManager():
     def setSpeed(self, speed:float) -> None:
         try:
             """
-            Define the DCMotor speed.
-            
+            Sets the speed of the DC motors.
+
             :param speed: Value between -100 and 100.
-                          Positive value means going frontward, negative value means going backward and zero means stopping.
+            A negative value indicates reverse,
+            a positive value indicates forward,
+            and 0 stops the motor.
             """
             if isinstance(speed, int) or isinstance(speed, float):
 
@@ -64,7 +66,9 @@ class MotorManager():
     def setAngle(self, steering:float) -> None:
         try:
             """
-            Define the angle :param steering: from -100 (pleine gauche) to 100 (full right), 0(straight).
+            Sets the angle for the steering servo.
+            
+            :param steering: Steering percentage from -100 (full left) to 100 (full right), 0 for straight ahead.
             """
             if isinstance(steering, int) or isinstance(steering, float):
                 servo_duty = self.convert_steering_to_duty(steering)
@@ -76,29 +80,23 @@ class MotorManager():
         
     def convert_steering_to_duty(self, steering: float) -> int:
         """
-        Converts a steering percentage (from -100 to 100) into a duty_cycle value (0 to 65535)
-    for a servo whose mechanical range is limited around the center.
+        Converts a steering percentage (-100 to 100) into a duty_cycle value (0 to 65535)
+        for a servo with a limited mechanical range around the center.
 
-    Parameters:
+        Parameters:
+        - steering: Steering percentage (-100 to 100)
+        - center_angle: The center angle of the servo (in degrees), typically 90°.
+        - range_deg: Maximum deviation from the center, e.g., 45°.
+                    This means -100% corresponds to center_angle - range_deg (90-45 = 45°)
+                    and 100% to center_angle + range_deg (90+45 = 135°).
+        - freq: PWM signal frequency (e.g., 60 Hz)
+        - min_pulse_ms: Minimum pulse width in ms (for 0° in the full mapping, e.g., 1.0 ms)
+        - max_pulse_ms: Maximum pulse width in ms (for 180° in the full mapping, e.g., 2.0 ms)
 
-    steering: steering percentage (-100 to 100)
+        The function first calculates the signal period, determines the full duty cycle range
+        for the servo, then extracts the value corresponding to the effective angle.
 
-    center_angle: the central angle of the servo (in degrees), typically 90°.
-
-    range_deg: the maximum deviation from the center, here 45°.
-    This means that -100% corresponds to center_angle - range_deg (90 - 45 = 45°)
-    and 100% to center_angle + range_deg (90 + 45 = 135°).
-
-    freq: PWM signal frequency (e.g., 60 Hz)
-
-    min_pulse_ms: minimum pulse width in ms (for 0° in full range mapping, e.g., 1.0 ms)
-
-    max_pulse_ms: maximum pulse width in ms (for 180° in full range mapping, e.g., 2.0 ms)
-
-    The function first calculates the signal period, determines the full duty cycle range
-    for the servo, then extracts the value corresponding to the effective angle.
-
-    :return: 16-bit duty_cycle value (0 to 65535)
+        :return: 16-bit duty_cycle value (0 to 65535)
         """
         center_angle = self.__servoDirection.centerAngle
         range_deg = self.__servoDirection.rangeDegrees

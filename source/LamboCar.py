@@ -297,7 +297,7 @@ class LamboCar:
 
         if frontDist is None or frontDist < min_front:
             self.__motorManager.setSpeed(-30)
-            time.sleep(1)  # ça a été rajouté pour éviter que la voiture ne recule trop
+            time.sleep(1)  
             self.__motorManager.setAngle(0)
             return (-30, 0)
 
@@ -305,6 +305,7 @@ class LamboCar:
             self.__motorManager.setSpeed(0)
             self.__motorManager.setAngle(0)
             return (0, 0)
+        
         elif leftDist is None:
             error = 1
         elif rightDist is None:
@@ -318,7 +319,6 @@ class LamboCar:
             rawSpeed = (frontDist - min_front) / (max_front - min_front) * 100
         except ZeroDivisionError:
             rawSpeed = 40
-            # Moteur n'avancerait pas avec la vitesse trop basse
 
         newSpeed = max(40, min(41, rawSpeed))
         correctionFactor = 1 - (abs(newAngle) / 100) * 0.5
@@ -376,19 +376,15 @@ class LamboCar:
                 if distance is not None and distance < 50:
                     self.logger.info(f"Obstacle detected at {distance} cm → initiating zigzag")
 
-                    # 1. Turn right
                     self.__motorManager.setAngle(80)
                     time.sleep(1.2)
 
-                    # 2. Turn left
                     self.__motorManager.setAngle(-90)
                     time.sleep(1.5)
 
-                    # 3. Return to center
                     self.__motorManager.setAngle(0)
 
                 else:
-                    # Keep moving forward if no obstacle
                     self.__motorManager.setSpeed(30)
                     self.__motorManager.setAngle(0)
 
