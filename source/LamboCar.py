@@ -316,18 +316,37 @@ class LamboCar:
             print("Stop the car.")
             self.stopCar()
 
+    def zigzagAvoidance(self):
+        try :
+            self.__motorManager.setSpeed(45)
+            self.__motorManager.setAngle(0)
 
-    """ 
-       def start(self):
-            try:
-                while True:
-                    self.stayMid()
-                    time.sleep(0.05)
-            except KeyboardInterrupt:
-                print("Stop the car.")
-                self.stopCar()
-    """
+            while True:
+                distance = self.__sensorManager.getDistance().front
 
+                if distance is not None and distance < 50:
+                    self.logger.info(f"Obstacle detected at {distance} cm → initiating zigzag")
+
+                    # 1. Turn right
+                    self.__motorManager.setAngle(80)
+                    time.sleep(1.2)
+
+                    # 2. Turn left
+                    self.__motorManager.setAngle(-90)
+                    time.sleep(1.5)
+
+                    # 3. Return to center
+                    self.__motorManager.setAngle(0)
+
+                else:
+                    # Keep moving forward if no obstacle
+                    self.__motorManager.setSpeed(30)
+                    self.__motorManager.setAngle(0)
+
+                time.sleep(0.1)
+        except KeyboardInterrupt:
+            print("Stop the car.")
+            self.stopCar()
 
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
