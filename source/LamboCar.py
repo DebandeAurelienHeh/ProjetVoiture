@@ -279,7 +279,10 @@ class LamboCar:
             self.logger.info("GREEN LIGHT! THE RACE IS ON!")
 
     def stayMid(self):
-        frontDist, leftDist, rightDist = self.__sensorManager.getDistance()
+        distance = self.__sensorManager.getDistance()
+        frontDist = distance.front
+        leftDist = distance.left
+        rightDist = distance.right
 
         min_front = 20
         max_front = 100
@@ -307,10 +310,10 @@ class LamboCar:
         try:
             rawSpeed = (frontDist - min_front) / (max_front - min_front) * 100
         except ZeroDivisionError:
-            rawSpeed = 10
+            rawSpeed = 40
             #Moteur n'avancerait pas avec la vitesse trop basse
 
-        newSpeed = max(10, min(100, rawSpeed))
+        newSpeed = max(40, min(100, rawSpeed))
         correctionFactor = 1 - (abs(newAngle) / 100) * 0.5
         newSpeed *= correctionFactor
 

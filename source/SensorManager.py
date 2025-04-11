@@ -112,7 +112,7 @@ class SensorManager:
             print("Error while detecting red color:", e)
             return False
 
-    def isGreen(self, greenMinimum: int = 150, G_R_DeltaMinimum: int = 50) -> bool:
+    def isGreen(self, greenMinimum: int = 25, G_R_DeltaMinimum: int = 5) -> bool:
         """
         Detects green color from RGB sensor data.
         Returns True if green value is high and significantly greater than red.
