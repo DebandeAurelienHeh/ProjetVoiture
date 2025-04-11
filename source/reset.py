@@ -18,23 +18,23 @@ def main():
         if command == "stop":
             # Appel immédiat de la méthode stopCar
             lambo.stopCar()
-            print(">>> La voiture est arrêtée !")
+            print(">>> Car stopped !")
             
         elif command == "reset":
             # S’il y a une logique de reset à ajouter, tu la mets ici
-            print(">>> Reset (ou toute autre logique) appelé !")
+            print(">>> Resetting car...")
             # Par exemple :
             lambo.stopCar()
             # lambo.prepareMotors() ou autre...
             
         else:
-            print(f"Commande inconnue : {command}")
-            print("Utilisation possible : python mon_script.py stop | reset")
+            print(f"unknown command : {command}")
+            print("Possible usage: python my_script.py stop | reset")
     else:
-        print("Aucune commande spécifiée.")
-        print("Utilisation :")
-        print("  python mon_script.py stop")
-        print("  python mon_script.py reset")
+        print("No command specified.")
+        print("Usage:")
+        print("  python my_script.py stop")
+        print("  python my_script.py reset")
 
 # Point d'entrée
 if __name__ == "__main__":
