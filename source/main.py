@@ -13,9 +13,12 @@ def main():
             lambo.test()
             ack = False
         elif command == "start":
-            lambo.start()
+            lambo.startCar()
             ack = False
         elif command == "green":
             lambo.start_on_green()
             ack = False
+
+if __name__ == "__main__":
+    main()
 

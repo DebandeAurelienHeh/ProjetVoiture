@@ -67,45 +67,62 @@ class LamboCar:
         except Exception as e:
             self.logger.error(f"Error in LineCount: {e}")
 
-    def detectObstacle(self):
-        while True:
-            with self.__lock:
-                distances = self.sensorManager.getDistance()
-                front_distance = distances.front
-                left_distance = distances.left
-                right_distance = distances.right
+    def stayMid(self):
+        # Récupération et normalisation des distances
+        distances = self.sensorManager.getDistance()
 
-                self.motorManager.setSpeed(50)
-                self.motorManager.setAngle(0)
-                time.sleep(0.1)
+        # Clamp des valeurs selon les limites des capteurs (2cm - 400cm)
+        frontDist = max(min(distances.front or 400, 400), 2)
+        leftDist = max(min(distances.left or 400, 400), 2)
+        rightDist = max(min(distances.right or 400, 400), 2)
 
-                if front_distance is not None and front_distance < 30:
-                    self.logger.info(f"Front obstacle detected ({front_distance} cm)")
-                    time.sleep(1)
+        # Configuration des paramètres
+        corridor_width = 60  # cm
+        target_offset = 15  # cm de marge de chaque côté
+        Kp = 3  # Gain proportionnel réduit
+        base_speed = 30  # vitesse de base réduite
+        min_front = 25  # distance frontale minimale
 
-                    left = left_distance if left_distance is not None else 0
-                    right = right_distance if right_distance is not None else 0
-                    self.logger.info(f"Left: {left} cm, Right: {right} cm")
+        # 1. Logique d'évitement d'obstacle frontal
+        if frontDist < min_front:
+            self.logger.info("Obstacle frontal détecté - Manœuvre d'évitement")
+            self.__motorManager.setSpeed(-25)
+            # Choix de la direction avec le plus d'espace
+            if (leftDist - target_offset) > (rightDist - target_offset):
+                self.__motorManager.setAngle(70)  # Recule à droite
+            else:
+                self.__motorManager.setAngle(-70)  # Recule à gauche
+            time.sleep(0.8)
+            self.__motorManager.setSpeed(base_speed)
+            time.sleep(1.2)
+            self.__motorManager.setAngle(0)
+            return
 
-                    self.motorManager.setSpeed(-40)
-                    time.sleep(0.7)
-                    self.motorManager.setSpeed(0)
+        # 2. Calcul de la position idéale dans le couloir
+        total_space = leftDist + rightDist
+        if total_space < corridor_width * 0.8:  # Si le couloir semble rétrécir
+            target_left = corridor_width / 2 - target_offset
+            target_right = corridor_width / 2 - target_offset
+        else:
+            target_left = (corridor_width - (rightDist * 0.7))  # Priorité au côté droit dans les virages
+            target_right = (corridor_width - (leftDist * 0.7))
 
-                    if left > right:
-                        self.logger.info("Turning left (more space)")
-                        self.turnLeft()
-                    else:
-                        self.logger.info("Turning right (more space)")
-                        self.turnRight()
+        # 3. Calcul de l'erreur proportionnelle
+        error = (rightDist - target_right) - (leftDist - target_left)
+        angle = max(-70, min(70, Kp * error))
 
-                elif left_distance is not None and left_distance < 15:
-                    self.logger.info(f"Left obstacle ({left_distance} cm)")
-                    self.turnRight()
-                elif right_distance is not None and right_distance < 15:
-                    self.logger.info(f"Right obstacle ({right_distance} cm)")
-                    self.turnLeft()
+        # 4. Adaptation dynamique de la vitesse
+        space_factor = min(frontDist / 100, 1.0)  # Réduction vitesse devant obstacle
+        turn_factor = 1 - (abs(angle) / 70 * 0.4)  # Réduction en virage serré
+        speed = max(20, base_speed * space_factor * turn_factor)
 
-            time.sleep(0.1)
+        # 5. Application des commandes
+        self.__motorManager.setAngle(int(angle))
+        self.__motorManager.setSpeed(int(speed))
+
+        self.logger.debug(f"L:{leftDist:.1f} | R:{rightDist:.1f} | Ang:{angle:.1f} | Spd:{speed:.1f}")
+
+        return (speed, angle)
 
     def startCar(self):
         self.__motorManager.setSpeed(25)
@@ -218,7 +235,7 @@ class LamboCar:
 
     def prepareSensors(self):
         print("Preparing sensors...")
-        all_ready = True  
+        all_ready = True
 
         # ---- RGB Sensor ----
         data_rgb = self.__sensorManager.rgbSensor.readValue()
@@ -273,7 +290,6 @@ class LamboCar:
             self.logger.error("Some sensors are not responding!")
         return all_ready
 
-
     def start_on_green(self):
         if self.__sensorManager.isGreen():
             self.logger.info("GREEN LIGHT! THE RACE IS ON!")
@@ -294,7 +310,7 @@ class LamboCar:
 
         if frontDist is None or frontDist < min_front:
             self.__motorManager.setSpeed(-30)
-            time.sleep(1)                       #ça a été rajouté pour éviter que la voiture ne recule trop
+            time.sleep(1)  # ça a été rajouté pour éviter que la voiture ne recule trop
             self.__motorManager.setAngle(0)
             return (-30, 0)
 
@@ -315,9 +331,9 @@ class LamboCar:
             rawSpeed = (frontDist - min_front) / (max_front - min_front) * 100
         except ZeroDivisionError:
             rawSpeed = 40
-            #Moteur n'avancerait pas avec la vitesse trop basse
+            # Moteur n'avancerait pas avec la vitesse trop basse
 
-        newSpeed = max(40, min(100, rawSpeed))
+        newSpeed = max(40, min(41, rawSpeed))
         correctionFactor = 1 - (abs(newAngle) / 100) * 0.5
         newSpeed *= correctionFactor
 
@@ -334,27 +350,26 @@ class LamboCar:
         self.start()
 
     def start(self):
-        self.stayMid()
+        try:
+            while True:
+                self.stayMid()
+                time.sleep(0.05)
+        except KeyboardInterrupt:
+            print("Stop the car.")
+            self.stopCar()
 
 """
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
     lambo = LamboCar(i2c_bus)
 
-    lambo.prepareMotors()
-    time.sleep(1)
-    lambo.prepareSensors()
-    time.sleep(1)
-
-    thread = threading.Thread(target=lambo.start_on_green(), daemon=True)
-    thread.start()
     try:
         while True:
-            time.sleep(1)
+            lambo.stayMid()
+            time.sleep(0.05)
     except KeyboardInterrupt:
         print("Stop the car.")
         lambo.stopCar()
-
 
 if __name__ == "__main__":
     main()
