@@ -49,7 +49,6 @@ All components were provided or approved by our teachers:
 - 📄 [Hardware Documentation (French)(PDF)](docs/ChoixMateriel.pdf)
 - 📄 [Software and Libraries Choices (French)(PDF)](docs/DocumentationChoixLogiciels.pdf)
 
-
 ## 👥 Team 6 Members
 
 - De Coster Koryan  
