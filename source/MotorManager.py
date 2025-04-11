@@ -5,6 +5,12 @@ import busio
 import board
 import time
 
+"""
+Module for the MotorManager class.
+This class is used to manage the motors of the LamboCar.
+It initializes the DC motors and the servo motor using the PCA9685 driver.
+It also provides methods to set the speed and angle of the motors.
+"""
 class MotorManager():
     def __init__(self, i2c_bus:busio.I2C):
         self.__dcMotorsPropulsion = [DCMotor(5, 17, 18), DCMotor(4, 27, 22)]
@@ -26,10 +32,10 @@ class MotorManager():
     def setSpeed(self, speed:float) -> None:
         try:
             """
-            Définit la vitesse des moteurs DC.
+            Define the DCMotor speed.
             
-            :param speed: Valeur comprise entre -100 et 100.
-                          Un signe négatif indique la marche arrière, positif la marche avant, 0 arret.
+            :param speed: Value between -100 and 100.
+                          Positive value means going frontward, negative value means going backward and zero means stopping.
             """
             if isinstance(speed, int) or isinstance(speed, float):
 
@@ -58,7 +64,7 @@ class MotorManager():
     def setAngle(self, steering:float) -> None:
         try:
             """
-            Définit l'angle pour le servo de direction. :param steering: Pourcentage de braquage de -100 (pleine gauche) à 100 (pleine droite), 0(tout droit).
+            Define the angle :param steering: from -100 (pleine gauche) to 100 (full right), 0(straight).
             """
             if isinstance(steering, int) or isinstance(steering, float):
                 servo_duty = self.convert_steering_to_duty(steering)
@@ -70,23 +76,29 @@ class MotorManager():
         
     def convert_steering_to_duty(self, steering: float) -> int:
         """
-        Convertit un pourcentage de braquage (de -100 à 100) en une valeur duty_cycle (0 à 65535)
-        pour un servo dont la plage mécanique est limitée autour du centre.
-        
-        Paramètres :
-        - steering: pourcentage de braquage (-100 à 100)
-        - center_angle: l'angle central du servo (en degrés), typiquement 90°.
-        - range_deg: la déviation maximale par rapport au centre, ici 45°.
-                    Cela signifie que -100% correspondra à center_angle - range_deg (90-45=45°)
-                    et 100% à center_angle + range_deg (90+45=135°).
-        - freq: fréquence du signal PWM (ex: 60 Hz)
-        - min_pulse_ms: largeur d'impulsion minimale en ms (pour 0° dans le mapping complet, ex: 1.0 ms)
-        - max_pulse_ms: largeur d'impulsion maximale en ms (pour 180° dans le mapping complet, ex: 2.0 ms)
-        
-        La fonction calcule d'abord la période du signal, détermine la plage de duty cycle
-        pour le servo complet, puis extrait la valeur correspondant à l'angle effectif.
-        
-        :return: Valeur duty_cycle sur 16 bits (0 à 65535)
+        Converts a steering percentage (from -100 to 100) into a duty_cycle value (0 to 65535)
+    for a servo whose mechanical range is limited around the center.
+
+    Parameters:
+
+    steering: steering percentage (-100 to 100)
+
+    center_angle: the central angle of the servo (in degrees), typically 90°.
+
+    range_deg: the maximum deviation from the center, here 45°.
+    This means that -100% corresponds to center_angle - range_deg (90 - 45 = 45°)
+    and 100% to center_angle + range_deg (90 + 45 = 135°).
+
+    freq: PWM signal frequency (e.g., 60 Hz)
+
+    min_pulse_ms: minimum pulse width in ms (for 0° in full range mapping, e.g., 1.0 ms)
+
+    max_pulse_ms: maximum pulse width in ms (for 180° in full range mapping, e.g., 2.0 ms)
+
+    The function first calculates the signal period, determines the full duty cycle range
+    for the servo, then extracts the value corresponding to the effective angle.
+
+    :return: 16-bit duty_cycle value (0 to 65535)
         """
         center_angle = self.__servoDirection.centerAngle
         range_deg = self.__servoDirection.rangeDegrees

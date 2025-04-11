@@ -1,5 +1,8 @@
 import RPi.GPIO as GPIO
-
+"""
+DCMotor class for controlling a DC motor using GPIO pins on a Raspberry Pi.
+This class allows you to set the direction of the motor and stop it.
+"""
 class DCMotor:
     def __init__(self, enable, input1, input2):
         self.__pinEnable = enable
@@ -24,6 +27,10 @@ class DCMotor:
         return self.__pinInput2
 
     def setDirection(self, direction):
+        """Set the direction of the motor.
+        Args:
+            direction (bool): True for one direction, False for the opposite.
+        """
         if direction:
             GPIO.output(self.__pinInput1, GPIO.LOW)
             GPIO.output(self.__pinInput2, GPIO.HIGH)
@@ -32,6 +39,9 @@ class DCMotor:
             GPIO.output(self.__pinInput2, GPIO.LOW)
 
     def stop(self):
+        """
+        Stop the motor.
+        """
         GPIO.output(self.__pinInput1, GPIO.HIGH)
         GPIO.output(self.__pinInput2, GPIO.HIGH)
 

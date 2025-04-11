@@ -2,7 +2,12 @@ from I2CSensor import I2CSensor
 import busio
 import board
 import adafruit_ina219
-
+"""
+Class for INA219 sensor.
+This class inherits from I2CSensor and implements the readValue method.
+This class is used to read the values from the INA219 sensor.
+It uses the adafruit_ina219 library to communicate with the sensor over I2C.
+"""
 class INASensor(I2CSensor):
     def __init__(self, i2c_bus:busio.I2C):
         super().__init__(i2c_bus)

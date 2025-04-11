@@ -9,7 +9,11 @@ from logs_config import setup_logging
 
 setup_logging()
 
-
+"""
+LamboCar class for controlling a car with motors and sensors.
+This class provides methods to control the car's movement, manage sensors, and perform various maneuvers.
+It also includes methods for lap counting and obstacle avoidance.
+"""
 class LamboCar:
     def __init__(self, i2c_bus: busio.I2C):
         self.__carName = "LamboCar"
@@ -62,6 +66,10 @@ class LamboCar:
         self.__tour = tour
 
     def LineCount(self):
+        """
+        Counts laps based on line detection.
+        Increments the lap count when a line is detected.
+        """
         try:
             on_line = self.sensorManager.detectLine()
             if on_line and not self.__last_line_state:
@@ -72,6 +80,10 @@ class LamboCar:
             self.logger.error(f"Error in LineCount: {e}")
 
     def startCar(self):
+        """
+        Starts the car by setting the speed and angle of the motors.
+        Gradually increases the speed to avoid sudden acceleration.
+        """
         self.__motorManager.setSpeed(25)
         time.sleep(1)
         self.__motorManager.setSpeed(50)
@@ -79,10 +91,17 @@ class LamboCar:
         self.__motorManager.setSpeed(75)
 
     def stopCar(self):
+        """
+        Stops the car by setting the speed and angle of the motors to zero.
+        """
         self.__motorManager.setSpeed(0)
         self.__motorManager.setAngle(0)
 
     def reverseGear(self):
+        """
+        Reverses the car by setting the speed to negative values.
+        Gradually decreases the speed to avoid sudden deceleration.
+        """
         self.logger.info("The car is going forward")
         self.__motorManager.setSpeed(25)
         time.sleep(2)
@@ -104,6 +123,10 @@ class LamboCar:
         self.logger.info("The car is stopping")
 
     def uTurn(self):
+        """
+        Performs a U-turn by setting the speed and angle of the motors.
+        The car turns in place for a specified duration before stopping.
+        """
         for _ in range(4):
             self.__motorManager.setAngle(-100)
             self.__motorManager.setSpeed(-25)
@@ -117,6 +140,10 @@ class LamboCar:
         self.__motorManager.setSpeed(0)
 
     def circle(self, direction: str):
+        """
+        Performs a circular motion by setting the speed and angle of the motors.
+        The direction can be either 'left' or 'right'.
+        """
         self.__motorManager.setSpeed(50)
         if direction.lower() == "left":
             self.__motorManager.setAngle(-100)
@@ -130,6 +157,10 @@ class LamboCar:
         self.__motorManager.setSpeed(0)
 
     def eightTurn(self, duration: int):
+        """
+        Performs an eight-turn maneuver by alternating between left and right turns.
+        The duration specifies how many times the turn is performed.
+        """
         self.__motorManager.setSpeed(40)
         for _ in range(duration):
             self.__motorManager.setAngle(-100)
@@ -152,6 +183,9 @@ class LamboCar:
         time.sleep(0.5)
 
     def prepareMotors(self):
+        """
+        Tests the motors for operation by setting their speed and angle.
+        """
         print("Preparing DC motors...")
         self.__motorManager.setSpeed(0)
         time.sleep(0.5)
@@ -181,10 +215,12 @@ class LamboCar:
         self.logger.info("Servo motors : Ok!")
 
     def prepareSensors(self):
+        """
+        Tests the sensors for operation by reading their values and checking their responses.
+        """
         print("Preparing sensors...")
         all_ready = True
 
-        # ---- RGB Sensor ----
         data_rgb = self.__sensorManager.rgbSensor.readValue()
         if data_rgb is not None:
             red, green, blue = data_rgb.red, data_rgb.green, data_rgb.blue
@@ -196,7 +232,6 @@ class LamboCar:
             self.logger.error("RGB Sensor does not respond!")
             all_ready = False
 
-        # ---- INA219 Current Sensor ----
         data_ina = self.__sensorManager.getCurrent()
         if data_ina is not None:
             print(f"Current in milliamps: {data_ina}")
@@ -207,7 +242,6 @@ class LamboCar:
             self.logger.error("INA219 sensor does not respond!")
             all_ready = False
 
-        # ---- Distance Sensors ----
         data_dist = self.__sensorManager.getDistance()
         if data_dist is not None:
             front, left, right = data_dist.front, data_dist.left, data_dist.right
@@ -219,7 +253,6 @@ class LamboCar:
             self.logger.error("Distance sensors do not respond!")
             all_ready = False
 
-        # ---- Line Sensor ----
         data_line = self.__sensorManager.detectLine()
         if data_line is not None:
             print(f"Line sensor does not detect black line: {data_line}")
@@ -238,6 +271,9 @@ class LamboCar:
         return all_ready
 
     def start_on_green(self, tours):
+        """
+        Starts the car when the green light is detected.
+        Continuously checks the sensor for the green light and starts the car when detected."""
         while True:
             if self.__sensorManager.isGreen():
                 self.logger.info("GREEN LIGHT! THE RACE IS ON!")
@@ -247,6 +283,9 @@ class LamboCar:
                 time.sleep(0.5)
 
     def stayMid(self):
+        """
+        Keeps the car in the middle of the track by adjusting the speed and angle based on sensor readings.
+        """
         distance = self.__sensorManager.getDistance()
         frontDist = distance.front
         leftDist = distance.left
@@ -291,6 +330,9 @@ class LamboCar:
         return (newSpeed, newAngle)
 
     def test(self):
+        """
+        Test function to prepare the car for operation.
+        """
         self.prepareMotors()
         time.sleep(1)
         self.prepareSensors()
@@ -298,6 +340,9 @@ class LamboCar:
         self.start()
 
     def start(self, max_tours):
+        """
+        Starts the car and counts laps based on line detection.
+        """
         line_detected = False
         try:
             while self.tour < max_tours:
@@ -317,6 +362,10 @@ class LamboCar:
             self.stopCar()
 
     def zigzagAvoidance(self):
+        """
+        Zigzag avoidance maneuver to navigate around obstacles.
+        The car turns right and left alternately when an obstacle is detected within a certain distance.
+        """
         try :
             self.__motorManager.setSpeed(45)
             self.__motorManager.setAngle(0)
@@ -349,6 +398,9 @@ class LamboCar:
             self.stopCar()
 
 def main():
+    """
+    Main function to initialize the LamboCar and start the car.
+    """
     i2c_bus = busio.I2C(board.SCL, board.SDA)
     lambo = LamboCar(i2c_bus)
 
