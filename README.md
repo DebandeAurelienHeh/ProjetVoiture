@@ -46,8 +46,8 @@ All components were provided or approved by our teachers:
 
 ## 📚 Additional Documentation
 
-- 📄 [Hardware Documentation (French)(PDF)](docs/hardware_documentation.pdf)
-- 📄 [Software and Libraries Choices (French)(PDF)](docs/software_choices.pdf)
+- 📄 [Hardware Documentation (French)(PDF)](docs/ChoixMateriel.pdf)
+- 📄 [Software and Libraries Choices (French)(PDF)](docs/DocumentationChoixLogiciels.pdf)
 
 
 ## 👥 Team 6 Members
