@@ -1,4 +1,7 @@
 class DistanceData:
+    """
+    Class to store the distance data from ultrasonic sensors.
+    """
     def __init__(self, front, left, right):
         self.__front = front
         self.__left = left

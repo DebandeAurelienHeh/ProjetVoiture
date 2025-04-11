@@ -5,6 +5,12 @@ import busio
 import board
 import time
 
+"""
+Module for the MotorManager class.
+This class is used to manage the motors of the LamboCar.
+It initializes the DC motors and the servo motor using the PCA9685 driver.
+It also provides methods to set the speed and angle of the motors.
+"""
 class MotorManager():
     def __init__(self, i2c_bus:busio.I2C):
         self.__dcMotorsPropulsion = [DCMotor(5, 17, 18), DCMotor(4, 27, 22)]
@@ -61,7 +67,7 @@ class MotorManager():
         try:
             """
             Sets the angle for the steering servo.
-
+            
             :param steering: Steering percentage from -100 (full left) to 100 (full right), 0 for straight ahead.
             """
             if isinstance(steering, int) or isinstance(steering, float):

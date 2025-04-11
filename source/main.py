@@ -3,6 +3,10 @@ import busio
 import board
 
 def main():
+    """
+    Main function to control the LamboCar.
+    It initializes the I2C bus and creates an instance of the LamboCar class.
+    """
     i2c_bus = busio.I2C(board.SCL, board.SDA)
     lambo = LamboCar.LamboCar(i2c_bus)
 

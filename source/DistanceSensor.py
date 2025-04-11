@@ -4,6 +4,16 @@ from Sensor import Sensor
 import logging
 
 class DistanceSensor(Sensor):
+    """
+    DistanceSensor class for measuring distance using ultrasonic sensors.
+    This class uses GPIO pins on a Raspberry Pi to trigger the ultrasonic sensor
+    and read the echo signal.
+    
+    Attributes:
+        pinTrig (int): GPIO pin number for the trigger.
+        pinEcho (int): GPIO pin number for the echo.
+        side (str): Side of the robot (e.g., "front", "left", "right").
+    """
     def __init__(self, pinTrig: int, pinEcho: int, side: str):
         self.__pinTrig = pinTrig
         self.__pinEcho = pinEcho
@@ -18,6 +28,14 @@ class DistanceSensor(Sensor):
         return self.__side
 
     def readValue(self) -> float:
+        """
+        Measure the distance using the ultrasonic sensor.  
+        Sends a trigger signal and waits for the echo signal to calculate the distance.
+        Returns:
+            float: Distance in centimeters.
+            Raises:
+                TimeoutError: If the signal duration is too long.
+                ValueError: If the distance is out of range or invalid."""
         try:
             GPIO.output(self.__pinTrig, True)
             time.sleep(0.00001)
@@ -36,8 +54,8 @@ class DistanceSensor(Sensor):
             while GPIO.input(self.__pinEcho) == 1:
                 stop_time = time.time()
                 if stop_time > timeout:
-                    self.logger.error("End signal is too long.")
-                    raise TimeoutError("End signal is too long")
+                    self.logger.error("End of the signal is too long.")
+                    raise TimeoutError("End of the signal is too long.")
 
             duration = stop_time - start_time
             if duration <= 0:

@@ -2,7 +2,14 @@ from Sensor import Sensor
 import RPi.GPIO as GPIO
 import time
 
+"""
+Module for the LineSensor class.
+This class is used to read the value of a line sensor connected to a Raspberry Pi GPIO pin.
+It inherits from the Sensor class.
+"""
+
 class LineSensor(Sensor):
+    
     def __init__(self,pinGPIO:int):
         self.__pinGPIO = pinGPIO
         GPIO.setmode(GPIO.BCM)
