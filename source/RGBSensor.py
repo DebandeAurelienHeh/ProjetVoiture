@@ -11,5 +11,5 @@ class RGBSensor(I2CSensor):
     
     def readValue(self):
         """ return a tuple with the values of the sensor Red Green Blue"""
-        return RGBData(self.__sensor.color_rgb_bytes)
+        return RGBData(self.__sensor.color_rgb_bytes[0],self.__sensor.color_rgb_bytes[1],self.__sensor.color_rgb_bytes[2])
         
