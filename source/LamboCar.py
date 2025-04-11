@@ -216,6 +216,64 @@ class LamboCar:
         print("Servo motors are prepared")
         self.logger.info("Servo motors : Ok!")
 
+    def prepareSensors(self):
+        print("Preparing sensors...")
+        all_ready = True  
+
+        # ---- RGB Sensor ----
+        data_rgb = self.__sensorManager.__rgbSensor.readValue()
+        if data_rgb is not None:
+            red, green, blue = data_rgb.red, data_rgb.green, data_rgb.blue
+            print(f"RGB Sensor: Red: {red}, Green: {green}, Blue: {blue}")
+            self.logger.info("RGB Sensor is ready")
+            print("RGB Sensor is ready!")
+        else:
+            print("RGB Sensor does not respond!")
+            self.logger.error("RGB Sensor does not respond!")
+            all_ready = False
+
+        # ---- INA219 Current Sensor ----
+        data_ina = self.__sensorManager.getCurrent()
+        if data_ina is not None:
+            print(f"Current in milliamps: {data_ina}")
+            self.logger.info(f"INA219 sensor is ready. Current in milliamps: {data_ina}")
+            print("INA219 sensor is ready!")
+        else:
+            print("INA219 sensor does not respond!")
+            self.logger.error("INA219 sensor does not respond!")
+            all_ready = False
+
+        # ---- Distance Sensors ----
+        data_dist = self.__sensorManager.getDistance()
+        if data_dist is not None:
+            front, left, right = data_dist.front, data_dist.left, data_dist.right
+            print(f"Distance: Front: {front}, Left: {left}, Right: {right}")
+            self.logger.info("Distance sensors are ready")
+            print("Distance sensors are ready!")
+        else:
+            print("Distance sensors do not respond!")
+            self.logger.error("Distance sensors do not respond!")
+            all_ready = False
+
+        # ---- Line Sensor ----
+        data_line = self.__sensorManager.detectLine()
+        if data_line is not None:
+            print(f"Line sensor detects black line: {data_line}")
+            self.logger.info("Line sensor is ready")
+            print("Line sensor is ready!")
+        else:
+            print("Line sensor does not respond!")
+            self.logger.error("Line sensor does not respond!")
+            all_ready = False
+        if all_ready:
+            print("All sensors are ready!")
+            self.logger.info("All sensors are ready!")
+        else:
+            print("Some sensors are not responding!")
+            self.logger.error("Some sensors are not responding!")
+        return all_ready
+        
+
     def start_on_green(self):
         if self.__sensorManager.isGreen():
             self.logger.info("GREEN LIGHT! THE RACE IS ON!")
