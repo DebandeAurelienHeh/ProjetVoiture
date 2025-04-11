@@ -71,63 +71,6 @@ class LamboCar:
         except Exception as e:
             self.logger.error(f"Error in LineCount: {e}")
 
-    def stayMid(self):
-        # Récupération et normalisation des distances
-        distances = self.sensorManager.getDistance()
-
-        # Clamp des valeurs selon les limites des capteurs (2cm - 400cm)
-        frontDist = max(min(distances.front or 400, 400), 2)
-        leftDist = max(min(distances.left or 400, 400), 2)
-        rightDist = max(min(distances.right or 400, 400), 2)
-
-        # Configuration des paramètres
-        corridor_width = 60  # cm
-        target_offset = 15  # cm de marge de chaque côté
-        Kp = 3  # Gain proportionnel réduit
-        base_speed = 30  # vitesse de base réduite
-        min_front = 25  # distance frontale minimale
-
-        # 1. Logique d'évitement d'obstacle frontal
-        if frontDist < min_front:
-            self.logger.info("Obstacle frontal détecté - Manœuvre d'évitement")
-            self.__motorManager.setSpeed(-25)
-            # Choix de la direction avec le plus d'espace
-            if (leftDist - target_offset) > (rightDist - target_offset):
-                self.__motorManager.setAngle(70)  # Recule à droite
-            else:
-                self.__motorManager.setAngle(-70)  # Recule à gauche
-            time.sleep(0.8)
-            self.__motorManager.setSpeed(base_speed)
-            time.sleep(1.2)
-            self.__motorManager.setAngle(0)
-            return
-
-        # 2. Calcul de la position idéale dans le couloir
-        total_space = leftDist + rightDist
-        if total_space < corridor_width * 0.8:  # Si le couloir semble rétrécir
-            target_left = corridor_width / 2 - target_offset
-            target_right = corridor_width / 2 - target_offset
-        else:
-            target_left = (corridor_width - (rightDist * 0.7))  # Priorité au côté droit dans les virages
-            target_right = (corridor_width - (leftDist * 0.7))
-
-        # 3. Calcul de l'erreur proportionnelle
-        error = (rightDist - target_right) - (leftDist - target_left)
-        angle = max(-70, min(70, Kp * error))
-
-        # 4. Adaptation dynamique de la vitesse
-        space_factor = min(frontDist / 100, 1.0)  # Réduction vitesse devant obstacle
-        turn_factor = 1 - (abs(angle) / 70 * 0.4)  # Réduction en virage serré
-        speed = max(20, base_speed * space_factor * turn_factor)
-
-        # 5. Application des commandes
-        self.__motorManager.setAngle(int(angle))
-        self.__motorManager.setSpeed(int(speed))
-
-        self.logger.debug(f"L:{leftDist:.1f} | R:{rightDist:.1f} | Ang:{angle:.1f} | Spd:{speed:.1f}")
-
-        return (speed, angle)
-
     def startCar(self):
         self.__motorManager.setSpeed(25)
         time.sleep(1)
@@ -354,17 +297,20 @@ class LamboCar:
         time.sleep(1)
         self.start()
 
-    def start(self, max_tours=1):
+    def start(self, max_tours):
         line_detected = False
         try:
             while self.tour < max_tours:
                 self.stayMid()
+
                 if self.sensorManager.detectLine() and not line_detected:
                     self.tour+=1
+                    self.logger.info(self.tour)
                     line_detected = True
-                elif not self.sensorManager.detectLine():
+                    time.sleep(0.5)
+                elif self.sensorManager.detectLine():
                     line_detected = False
-                time.sleep(0.05)
+                time.sleep(0.5)
             self.stopCar()
         except KeyboardInterrupt:
             print("Stop the car.")
@@ -382,7 +328,7 @@ class LamboCar:
                 self.stopCar()
     """
 
-"""
+
 def main():
     i2c_bus = busio.I2C(board.SCL, board.SDA)
     lambo = LamboCar(i2c_bus)
@@ -397,4 +343,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-"""

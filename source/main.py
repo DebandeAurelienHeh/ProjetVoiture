@@ -9,15 +9,15 @@ def main():
     ack=True
     while ack:
         command = input("Enter mode here [test,start,green]")
-        if command == "test":
+        if command.lower() == "test":
             lambo.test()
             ack = False
-        elif command == "start":
-            tours = input("How many turns?")
+        elif command.lower() == "start":
+            tours = int(input("How many turns?"))
             lambo.start(tours)
             ack = False
-        elif command == "green":
-            tours = input("How many turns?")
+        elif command.lower() == "green":
+            tours = int(input("How many turns?"))
             lambo.start_on_green(tours)
             ack = False
 
