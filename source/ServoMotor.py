@@ -5,7 +5,7 @@ class ServoMotor():
         self.__minPulse = 1.0 # in ms
         self.__maxPulse = 2.0 # in ms
         self.__centerAngle = 80
-        self.__frequency = 60
+        self.__frequency = 50
     
     @property
     def boardChannel(self) -> int:
