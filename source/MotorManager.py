@@ -11,7 +11,7 @@ class MotorManager():
         self.__servoDirection = ServoMotor(0, 50)
         self.__i2c_bus = i2c_bus
         self.__pwmDriver = adafruit_pca9685.PCA9685(self.__i2c_bus, address=0x40)
-        self.__pwmDriver.frequency = 60
+        self.__pwmDriver.frequency = 50
 
     @property
     def dcMotorsPropulsion(self):

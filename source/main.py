@@ -23,13 +23,13 @@ def main():
         elif command.lower() == "avoid":
             lambo.zigzagAvoidance()
             ack = False
-        elif command.lower() == "reverseGear":
+        elif command.lower() == "reversegear":
             lambo.reverseGear()
             ack = False
-        elif command.lower() == "uTurn":
+        elif command.lower() == "uturn":
             lambo.uTurn()
             ack = False
-        elif command.lower() == "eightTurn":
+        elif command.lower() == "eightturn":
             lambo.eightTurn()
             ack = False
 
